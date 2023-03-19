@@ -238,9 +238,13 @@ static_assert(not is_class_v<int>);
 
 /// is one of (exactly matched in the given list)
 /// T is in the given type list {P0, ..., PN}
-/// special case: if the list is empty, return false_type
 template <typename T, typename... P0toN>
-struct is_one_of : false_type
+struct is_one_of;
+
+/// partial specialization:
+/// the list is empty
+template <typename T>
+struct is_one_of<T> : public false_type
 {
 };
 
@@ -253,7 +257,7 @@ struct is_one_of<T, T, P1toN...> : true_type
 
 /// partial specialization:
 /// T is not at the first of the list, i.e., {P0, P2, ..., PN}
-/// recursively use the above metafunction
+/// recursively use the primary template
 template <typename T, typename P0, typename... P1toN>
 struct is_one_of<T, P0, P1toN...> : is_one_of<T, P1toN...>
 {
