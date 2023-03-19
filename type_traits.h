@@ -151,7 +151,7 @@ struct is_pointer : false_type
 {
 };
 
-/// this paritial specialization handle the cases with/without top-level cv-qualifiers
+/// this partial specialization handle the cases with/without top-level cv-qualifiers
 template <typename T>
 struct is_pointer<T*> : true_type
 {
