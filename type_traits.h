@@ -18,7 +18,7 @@ struct integral_constant
     constexpr value_type operator()() noexcept { return val; }
 };
 static_assert(integral_constant<int, 5u>::value == 5u);
-static_assert(integral_constant<bool, false>::value == false);
+static_assert(!integral_constant<bool, false>::value);
 
 /// bool constant
 template <bool val>
