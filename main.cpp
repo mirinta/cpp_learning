@@ -1,8 +1,4 @@
-#include "TestClass.h"
+#include <iostream>
+#include <typeinfo>
 
-int main()
-{
-    TestClass t{};
-
-    return 0;
-}
+int main() { return 0; }

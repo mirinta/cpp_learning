@@ -1,6 +1,8 @@
 #pragma once
 
 #include <type_traits>
+#include <vector>
+#include <list>
 
 namespace traits {
 /// integral constant
@@ -269,4 +271,37 @@ inline constexpr bool is_one_of_v = is_one_of<T, P0toN...>::value;
 static_assert(not is_one_of_v<int>);
 static_assert(not is_one_of_v<int, double, char, int*, const int>);
 static_assert(is_one_of_v<int, double, char, int>);
+
+/// is_container: every STL container has a pointer to iterator
+// version 1:
+// template <typename T>
+// struct is_stl_container
+//{
+//    template <typename U>
+//    static int test(typename U::iterator*);
+
+//    template <typename U>
+//    static char test(...);
+
+//    static constexpr bool value = sizeof(int) == sizeof(test<T>(nullptr));
+//};
+// version 2:
+template <typename T>
+true_type is_stl_container_impl(typename T::iterator*);
+
+template <typename T>
+false_type is_stl_container_impl(...);
+
+template <typename T>
+using is_stl_container = decltype(is_stl_container_impl<T>(nullptr));
+
+template <typename T>
+inline constexpr bool is_stl_container_v = is_stl_container<T>::value;
+
+static_assert(not is_stl_container_v<int>);
+static_assert(is_stl_container_v<std::vector<int>>);
+static_assert(is_stl_container_v<const std::vector<int>>);
+static_assert(is_stl_container_v<volatile std::vector<int>>);
+static_assert(is_stl_container_v<const volatile std::vector<int>>);
+static_assert(is_stl_container_v<std::list<std::vector<int>>>);
 } // namespace traits
