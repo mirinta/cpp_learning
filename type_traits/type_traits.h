@@ -3,6 +3,7 @@
 #include <type_traits>
 #include <vector>
 #include <list>
+#include <iostream>
 
 namespace traits {
 /// integral constant
@@ -202,15 +203,33 @@ static_assert(is_nullptr_t<const nullptr_t>);
 static_assert(is_nullptr_t<volatile nullptr_t>);
 static_assert(is_nullptr_t<const volatile nullptr_t>);
 
+/// void_t
+template <typename...>
+using void_t = void;
+
+static_assert(is_same_v<void, void_t<>>);
+static_assert(is_same_v<void, void_t<int, double, std::string>>);
+
 /// is class or union
-template <typename T>
-true_type is_class_or_union_impl(int T::*);
+// version 1:
+// template <typename T>
+// true_type is_class_or_union_impl(int T::*);
+
+// template <typename T>
+// false_type is_class_or_union_impl(...);
+
+// template <typename T>
+// using is_class_or_union = decltype(is_class_or_union_impl<T>(nullptr));
+// version 2:
+template <typename T, typename = void>
+struct is_class_or_union : public std::false_type
+{
+};
 
 template <typename T>
-false_type is_class_or_union_impl(...);
-
-template <typename T>
-using is_class_or_union = decltype(is_class_or_union_impl<T>(nullptr));
+struct is_class_or_union<T, std::void_t<int T::*>> : public std::true_type
+{
+};
 
 template <typename T>
 inline constexpr bool is_class_or_union_v = is_class_or_union<T>::value;
@@ -272,8 +291,19 @@ static_assert(not is_one_of_v<int>);
 static_assert(not is_one_of_v<int, double, char, int*, const int>);
 static_assert(is_one_of_v<int, double, char, int>);
 
-/// is_container: every STL container has a pointer to iterator
+/// is_container, a naive implementation
+/// every STL container has a pointer to iterator
 // version 1:
+// template <typename T>
+// true_type is_stl_container_impl(typename T::iterator*);
+
+// template <typename T>
+// false_type is_stl_container_impl(...);
+
+// template <typename T>
+// using is_stl_container = decltype(is_stl_container_impl<T>(nullptr));
+
+// version 2:
 // template <typename T>
 // struct is_stl_container
 //{
@@ -285,15 +315,17 @@ static_assert(is_one_of_v<int, double, char, int>);
 
 //    static constexpr bool value = sizeof(int) == sizeof(test<T>(nullptr));
 //};
-// version 2:
-template <typename T>
-true_type is_stl_container_impl(typename T::iterator*);
+
+// version 3:
+template <typename T, typename = void>
+struct is_stl_container : public std::false_type
+{
+};
 
 template <typename T>
-false_type is_stl_container_impl(...);
-
-template <typename T>
-using is_stl_container = decltype(is_stl_container_impl<T>(nullptr));
+struct is_stl_container<T, std::void_t<typename T::iterator>> : public std::true_type
+{
+};
 
 template <typename T>
 inline constexpr bool is_stl_container_v = is_stl_container<T>::value;
@@ -304,4 +336,34 @@ static_assert(is_stl_container_v<const std::vector<int>>);
 static_assert(is_stl_container_v<volatile std::vector<int>>);
 static_assert(is_stl_container_v<const volatile std::vector<int>>);
 static_assert(is_stl_container_v<std::list<std::vector<int>>>);
+
+/// are all integral, notice std::conjunction<>::value = true
+// version 1: empty list is allowed but it returns false
+template <typename... Ts>
+struct are_all_integral : public std::conjunction<std::is_integral<Ts>...>
+{
+};
+
+template <>
+struct are_all_integral<> : public std::false_type
+{
+};
+
+template <typename... Ts>
+inline constexpr bool are_all_integral_v = are_all_integral<Ts...>::value;
+
+// template <typename... Ts>
+// inline constexpr bool are_all_integral_v = are_all_integral<Ts...>::value;
+// version 2: emplty list is not allowed
+// template <typename T, typename... Ts>
+// struct are_all_integral : public std::conjunction<std::is_integral<T>, std::is_integral<Ts>...>
+//{
+//};
+
+// template <typename T, typename... Ts>
+// inline constexpr bool are_all_integral_v = are_all_integral<T, Ts...>::value;
+
+static_assert(not are_all_integral_v<>);
+static_assert(not are_all_integral_v<double, int>);
+static_assert(are_all_integral_v<size_t, int>);
 } // namespace traits
