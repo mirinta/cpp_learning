@@ -5,7 +5,7 @@
 #include <list>
 #include <iostream>
 
-namespace traits {
+namespace my_traits {
 /// integral constant
 template <typename T, T val>
 struct integral_constant
@@ -366,4 +366,4 @@ inline constexpr bool are_all_integral_v = are_all_integral<Ts...>::value;
 static_assert(not are_all_integral_v<>);
 static_assert(not are_all_integral_v<double, int>);
 static_assert(are_all_integral_v<size_t, int>);
-} // namespace traits
+} // namespace my_traits
