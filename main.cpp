@@ -1,4 +1,7 @@
 #include <iostream>
-#include <typeinfo>
 
-int main() { return 0; }
+int main()
+{
+    std::cout << "hello" << '\n';
+    return 0;
+}
