@@ -14,7 +14,7 @@
  * 4. The operator+ is noexcept and the return type is the same as the first arg type.
  */
 template <typename... Args>
-concept addable = requires(Args... args)
+concept Addable = requires(Args... args)
 {
     requires arguments_count_v<Args...> > 1;
     requires are_same_v<Args...>;
@@ -26,12 +26,12 @@ concept addable = requires(Args... args)
 };
 
 template <typename... Args>
-requires addable<Args...> auto add(Args&&... args)
+requires Addable<Args...> auto add(Args&&... args)
 {
     return (... + args);
 }
 
-namespace test_addable {
+namespace test_Addable {
 template <bool withNoExcept, bool hasOperatorPlus, bool validReturnType>
 struct Test
 {
@@ -52,11 +52,11 @@ using NoOperatorPlus = Test<true, false, true>;
 using WithoutNoExcept = Test<false, true, true>;
 using DifferentReturnType = Test<true, true, false>;
 
-static_assert(not addable<int>);
-static_assert(not addable<int, double>);
-static_assert(addable<int, int>);
-static_assert(addable<ValidClass, ValidClass>);
-static_assert(not addable<NoOperatorPlus, NoOperatorPlus>);
-static_assert(not addable<WithoutNoExcept, WithoutNoExcept>);
-static_assert(not addable<DifferentReturnType, DifferentReturnType>);
-} // namespace test_addable
+static_assert(not Addable<int>);
+static_assert(not Addable<int, double>);
+static_assert(Addable<int, int>);
+static_assert(Addable<ValidClass, ValidClass>);
+static_assert(not Addable<NoOperatorPlus, NoOperatorPlus>);
+static_assert(not Addable<WithoutNoExcept, WithoutNoExcept>);
+static_assert(not Addable<DifferentReturnType, DifferentReturnType>);
+} // namespace test_Addable
