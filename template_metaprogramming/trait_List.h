@@ -52,7 +52,7 @@ struct List_Select<L, 0>
 template <typename L, size_t Index>
 using list_select_t = typename List_Select<L, Index>::type;
 
-/// extract first N types
+/// extract the first N types
 template <typename L, size_t N>
 requires(N <= L::size) struct List_FirstN
 {
