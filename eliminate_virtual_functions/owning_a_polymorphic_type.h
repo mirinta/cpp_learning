@@ -14,14 +14,14 @@ concept IsInterface = requires(T t)
 };
 
 template <typename T, typename... Ts>
-concept IsOneOf = (... or std::same_as<T, Ts>);
+concept SameAsAny = (... or std::same_as<T, Ts>);
 
 template <IsInterface... Ts>
-struct Wrapper
+struct OneTypeWrapper
 {
-    explicit Wrapper(IsOneOf<Ts...> auto t) : _t(t) {}
+    explicit OneTypeWrapper(SameAsAny<Ts...> auto t) : _t(t) {}
 
-    void set_t(IsOneOf<Ts...> auto t) { _t = t; }
+    void set_t(SameAsAny<Ts...> auto t) { _t = t; }
 
 private:
     std::variant<Ts...> _t;
@@ -45,7 +45,7 @@ inline void usage()
     {
     };
 
-    using WrapT1orT2 = Wrapper<T1, T2>;
+    using WrapT1orT2 = OneTypeWrapper<T1, T2>;
     // using WrapT1orT4 = Wrapper<T1, T4>; // error, T4 is not a required interface
 
     WrapT1orT2 wrapper(T1{}); // ok, T1 is in the list, the wrapper owns an object of T1
