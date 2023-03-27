@@ -40,7 +40,7 @@ template <typename T>
 concept TypeList = is_type_list<T>::value;
 
 template <typename... Ts>
-constexpr auto type_count_v = std::integral_constant<size_t, sizeof...(Ts)>::value;
+inline constexpr size_t type_count_v = sizeof...(Ts);
 
 template <typename... Ts>
 concept NonEmpty = type_count_v<Ts...> > 0;
