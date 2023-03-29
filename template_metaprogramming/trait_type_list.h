@@ -15,15 +15,18 @@
  *  9. check if the list contains given type T;
  * 10. remove the type at given index I;
  * 11. replace the type at given index I with given type T;
+ * 12. swap the type at index I1 with the type at index I2;
+ * 13. extract the types at given indices;
+ * 14. remove duplicate types and retain their original order.
  *
- * TODO: swap? extract? enumera? sort?
+ * TODO: enumera? sort?
  *
  * Reference: https://github.com/lipk/cpp-typelist/blob/master/typelist.hpp
  */
 template <typename...>
 struct type_list;
 
-namespace impl {
+namespace detail {
 template <typename T>
 struct is_type_list : public std::false_type
 {
@@ -153,18 +156,38 @@ struct reverse_list<Head, Tail...>
 {
     using type = merge_lists_t<reverse_list_t<Tail...>, type_list<Head>>;
 };
-} // namespace impl
+
+template <typename L, typename... Ts>
+struct unique_list;
+
+template <typename L, typename... Ts>
+using unique_list_t = typename unique_list<L, Ts...>::type;
+
+template <typename... Ls>
+struct unique_list<type_list<Ls...>>
+{
+    using type = type_list<Ls...>;
+};
+
+template <typename... Ls, typename Head, typename... Tail>
+struct unique_list<type_list<Ls...>, Head, Tail...>
+{
+    using type = std::conditional_t<type_list<Ls...>::template contains<Head>,
+                                    unique_list_t<type_list<Ls...>, Tail...>,
+                                    unique_list_t<type_list<Ls..., Head>, Tail...>>;
+};
+} // namespace detail
 
 template <typename T>
-concept TypeList = impl::is_type_list_v<T>;
+concept TypeList = detail::is_type_list_v<T>;
 
-template <typename L, size_t Is>
-concept ValidIndex = TypeList<L> && (Is < L::size);
+template <typename L, size_t... Is>
+concept ValidIndex = TypeList<L> && sizeof...(Is) > 0 && ((Is < L::size) && ...);
 
 template <typename... Ts>
 struct type_list
 {
-    static constexpr auto size = impl::type_count_v<Ts...>;
+    static constexpr auto size = detail::type_count_v<Ts...>;
 
     template <typename T>
     using append = type_list<Ts..., T>;
@@ -173,24 +196,32 @@ struct type_list
     using prepend = type_list<T, Ts...>;
 
     template <TypeList L, TypeList... Ls>
-    using merge = impl::merge_lists_t<type_list, L, Ls...>;
+    using merge = detail::merge_lists_t<type_list, L, Ls...>;
 
-    using reverse = impl::reverse_list_t<Ts...>;
+    using reverse = detail::reverse_list_t<Ts...>;
 
     template <size_t I>
-    requires ValidIndex<type_list, I> using at = impl::get_nth_type_t<I, Ts...>;
+    requires ValidIndex<type_list, I> using at = detail::get_nth_type_t<I, Ts...>;
 
     template <typename T>
-    static constexpr auto indexOf = impl::type_index_v<T, 0, Ts...>;
+    static constexpr auto indexOf = detail::type_index_v<T, 0, Ts...>;
 
     template <typename T>
     static constexpr auto contains = indexOf<T> >= 0;
 
     template <size_t I>
-    requires ValidIndex<type_list, I> using removeAt = impl::remove_nth_type_t<I, Ts...>;
+    requires ValidIndex<type_list, I> using removeAt = detail::remove_nth_type_t<I, Ts...>;
 
     template <size_t I, typename T>
-    requires ValidIndex<type_list, I> using replaceAt = impl::replace_nth_type_t<I, T, Ts...>;
+    requires ValidIndex<type_list, I> using replaceAt = detail::replace_nth_type_t<I, T, Ts...>;
+
+    template <size_t I1, size_t I2>
+    using swapAt = typename replaceAt<I1, at<I2>>::template replaceAt<I2, at<I1>>;
+
+    template <size_t I, size_t... Is>
+    using keep = type_list<type_list::at<I>, type_list::at<Is>...>;
+
+    using unique = detail::unique_list_t<type_list<>, Ts...>;
 };
 
 /// test
@@ -235,3 +266,13 @@ static_assert(std::is_same_v<type_list<long, size_t>, L2::replaceAt<1, size_t>>)
 static_assert(std::is_same_v<L0, L0::reverse>);
 static_assert(std::is_same_v<L1, L1::reverse>);
 static_assert(std::is_same_v<L2, L2::reverse::reverse>);
+
+static_assert(std::is_same_v<L1, L1::swapAt<0, 0>>);
+static_assert(std::is_same_v<L2::reverse, L2::swapAt<0, 1>>);
+
+static_assert(std::is_same_v<L1::merge<L1, L1>, L1::keep<0, 0, 0>>);
+static_assert(std::is_same_v<L2::reverse, L2::keep<1, 0>>);
+
+static_assert(std::is_same_v<L0, L0::unique>);
+static_assert(std::is_same_v<L1, L1::merge<L1, L0>::unique>);
+static_assert(std::is_same_v<L2, L2::merge<L2::reverse, L2>::unique>);
