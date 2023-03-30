@@ -19,9 +19,11 @@
  * 13. extract the types at given indices;
  * 14. remove duplicate types and retain their original order.
  *
- * TODO: enumera? sort?
+ * TODO: enumerate? sort?
  *
- * Reference: https://github.com/lipk/cpp-typelist/blob/master/typelist.hpp
+ * Useful references: 
+ * https://github.com/lipk/cpp-typelist/blob/master/typelist.hpp
+ * https://vittorioromeo.info/index/blog/cpp20_lambdas_compiletime_for.html
  */
 template <typename...>
 struct type_list;
