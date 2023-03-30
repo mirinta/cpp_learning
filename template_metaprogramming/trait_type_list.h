@@ -21,7 +21,7 @@
  *
  * TODO: enumerate? sort?
  *
- * Useful references: 
+ * Useful references:
  * https://github.com/lipk/cpp-typelist/blob/master/typelist.hpp
  * https://vittorioromeo.info/index/blog/cpp20_lambdas_compiletime_for.html
  */
@@ -40,7 +40,7 @@ struct is_type_list<type_list<Ts...>> : public std::true_type
 };
 
 template <typename T>
-constexpr auto is_type_list_v = is_type_list<T>::value;
+inline constexpr auto is_type_list_v = is_type_list<T>::value;
 
 template <typename... Ts>
 struct type_count : public std::integral_constant<size_t, sizeof...(Ts)>
@@ -48,7 +48,7 @@ struct type_count : public std::integral_constant<size_t, sizeof...(Ts)>
 };
 
 template <typename... Ts>
-constexpr auto type_count_v = type_count<Ts...>::value;
+inline constexpr auto type_count_v = type_count<Ts...>::value;
 
 template <typename L1, typename... L2>
 struct merge_lists;
@@ -90,7 +90,7 @@ template <typename T, size_t I, typename... Ts>
 struct type_index;
 
 template <typename T, size_t I, typename... Ts>
-constexpr auto type_index_v = type_index<T, I, Ts...>::value;
+inline constexpr auto type_index_v = type_index<T, I, Ts...>::value;
 
 template <typename T, size_t I>
 struct type_index<T, I> : public std::integral_constant<int64_t, -1>
