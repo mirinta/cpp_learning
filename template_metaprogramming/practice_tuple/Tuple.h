@@ -7,6 +7,7 @@
 template <typename... ELEMS>
 struct Tuple
 {
+    /// Constructor: empty tuple, no "data" member
     constexpr Tuple() = default;
 };
 
@@ -15,9 +16,19 @@ struct Tuple
 template <typename E0, typename... E1toN>
 struct Tuple<E0, E1toN...> : public Tuple<E1toN...>
 {
-    /// Constructor
-    explicit constexpr Tuple(E0 e0, E1toN... e1toN) : Tuple<E1toN...>(e1toN...), data(e0) {}
-    E0 data;
+    /// Constructor: multiple types, only owns the data of the first type (E0)
+    /// IMPORTANT:
+    /// 1. Without forwarding reference, if the data type is Ei,
+    /// then #unnecessary_copy_data += i, due to the recursive inheritance.
+    ///
+    /// 2. Ej&& is not a forwarding reference!
+    /// We need new template parameters for the constructor
+    template <typename T0, typename... T1toN>
+    explicit constexpr Tuple(T0&& e0, T1toN&&... e1toN)
+        : Tuple<E1toN...>(std::forward<T1toN>(e1toN)...), data(std::forward<T0>(e0))
+    {
+    }
+    E0 data; /// here, copy e0 to "data" member is acceptable
 };
 
 /// Deduction guide to make template argument dedcution for constructors work (C++17)
@@ -28,17 +39,18 @@ Tuple(E0, E1toN...) -> Tuple<std::unwrap_ref_decay_t<E0>, std::unwrap_ref_decay_
 
 /// Helper function to make a tuple, @see std::make_tuple
 /// TODO: std::unwrap_ref_decay_t?
-/// version 1: all arguments are passed by value
+/// IMPORTANT: without forwarding reference, #unnecessary_copy_data += 1
 template <typename... ELEMS>
-auto make_tuple(ELEMS... elems)
+auto make_tuple(ELEMS&&... elems)
 {
-    return Tuple<std::unwrap_ref_decay_t<ELEMS>...>{elems...};
+    return Tuple<std::unwrap_ref_decay_t<ELEMS>...>{std::forward<ELEMS>(elems)...};
 };
 
 namespace detail {
 template <size_t I, typename TUPLE>
 struct get_impl : public get_impl<I - 1, pop_front_t<TUPLE>>
 {
+    static_assert(I < size_v<TUPLE>, "index out of range");
     /// Use pop_front_t to manipulate the type list
 };
 
@@ -93,4 +105,13 @@ constexpr decltype(auto) get(TUPLE&& tuple)
     /// TUPLE is a forwarding reference, it may have ref and cv-qualifiers.
     /// We need to remove them for using the type traits.
     return detail::get_impl<I, std::remove_cvref_t<TUPLE>>::get(std::forward<TUPLE>(tuple));
+}
+
+/// Helper function to concatenate multiple Tuples
+/// Example: concate Tuple{"0",1} and Tuple{"2",3.14} should return Tuple{"0",1,"2",3.14}
+/// IMPORTANT: use forwarding reference to avoid unnecessary copies
+template <typename... TUPLES>
+constexpr auto tuple_cat(TUPLES&&... tuples)
+{
+    return nullptr;
 }

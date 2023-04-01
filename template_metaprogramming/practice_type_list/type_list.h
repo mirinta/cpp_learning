@@ -173,6 +173,14 @@ struct unique<type_list<Ts...>, Head, Tail...>
 
 template <typename L, typename... Ts>
 using unique_t = typename unique<L, Ts...>::type;
+
+template <template <typename> class Predicate, typename... Ts>
+struct any
+{
+};
+
+template <template <typename> class Predicate, typename... Ts>
+inline constexpr auto any_v = any<Predicate, Ts...>::value;
 } // namespace detail
 
 template <typename T>
@@ -219,6 +227,9 @@ struct type_list
     using reverse = detail::reverse_t<Ts...>;
 
     using unique = detail::unique_t<type_list<>, Ts...>;
+
+    template <template <typename> class Predicate>
+    static constexpr auto any = std::disjunction_v<Predicate<Ts>...>;
 };
 
 /// test
@@ -275,3 +286,16 @@ static_assert(std::is_same_v<L2::reverse, L2::slice<1, 0>>);
 static_assert(std::is_same_v<L0, L0::unique>);
 static_assert(std::is_same_v<L1, L1::merge<L1, L0>::unique>);
 static_assert(std::is_same_v<L2, L2::merge<L2::reverse, L2>::unique>);
+
+template <typename T>
+struct same_as_predicate
+{
+    template <typename U>
+    struct predicate : public std::is_same<T, U>
+    {
+    };
+};
+static_assert(L2::any<same_as_predicate<long>::predicate>);
+static_assert(not L2::any<same_as_predicate<int>::predicate>);
+static_assert(L2::any<std::is_floating_point>);
+static_assert(not L0::any<std::is_floating_point>);
