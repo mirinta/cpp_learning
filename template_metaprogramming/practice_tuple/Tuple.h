@@ -46,12 +46,22 @@ auto make_tuple(ELEMS&&... elems)
     return Tuple<std::unwrap_ref_decay_t<ELEMS>...>{std::forward<ELEMS>(elems)...};
 };
 
+/// Helper function to get the number of types in a tuple
+template <typename TUPLE>
+struct tuple_size;
+
+template <typename... ELEMS>
+struct tuple_size<Tuple<ELEMS...>> : std::integral_constant<size_t, sizeof...(ELEMS)>
+{
+};
+
+template <typename TUPLE>
+inline constexpr auto tuple_size_v = tuple_size<TUPLE>::value;
+
 namespace detail {
 template <size_t I, typename TUPLE>
 struct get_impl : public get_impl<I - 1, pop_front_t<TUPLE>>
 {
-    static_assert(I < size_v<TUPLE>, "index out of range");
-    /// Use pop_front_t to manipulate the type list
 };
 
 template <typename TUPLE>
@@ -74,7 +84,7 @@ struct get_impl<0, TUPLE>
         /// i.e., assignment operations like get<...>(tuple) = xxx are not allowed.
         /// Thus, we need to ensure the return type has the same ref and cv-qualifiers as the input
         /// tuple.
-        /// To do so, we need to obtain the Ith type in the type list.
+        /// To do so, we need to obtain the the front type in the type list.
         /// Then apply the same ref and cv-qualifiers as the input tuple.
         constexpr auto is_lvalue = std::is_lvalue_reference_v<T>;
         constexpr auto is_const = std::is_const_v<std::remove_reference_t<T>>;
@@ -107,11 +117,36 @@ constexpr decltype(auto) get(TUPLE&& tuple)
     return detail::get_impl<I, std::remove_cvref_t<TUPLE>>::get(std::forward<TUPLE>(tuple));
 }
 
+namespace detail {
+/// version 1: concate two tuples
+/// e.g., tuple1 has N elements (t1,...,tn), tuple2 has M elements (u1,...,uk)
+///
+struct tuple_cat_impl
+{
+    template <typename TUPLE1, typename TUPLE2>
+    static auto f(TUPLE1&& tuple1, TUPLE2&& tuple2)
+    {
+        return cat_from_indices(
+            std::forward<TUPLE1>(tuple1), std::forward<TUPLE2>(tuple2),
+            std::make_index_sequence<tuple_size_v<std::remove_cvref_t<TUPLE1>>>(),
+            std::make_index_sequence<tuple_size_v<std::remove_cvref_t<TUPLE2>>>());
+    }
+
+    template <typename TUPLE1, typename TUPLE2, size_t... I1s, size_t... I2s>
+    static auto cat_from_indices(TUPLE1&& tuple1, TUPLE2&& tuple2, std::index_sequence<I1s...>,
+                                 std::index_sequence<I2s...>)
+    {
+        return Tuple{get<I1s>(std::forward<TUPLE1>(tuple1))...,
+                     get<I2s>(std::forward<TUPLE2>(tuple2))...};
+    }
+};
+} // namespace detail
+
 /// Helper function to concatenate multiple Tuples
 /// Example: concate Tuple{"0",1} and Tuple{"2",3.14} should return Tuple{"0",1,"2",3.14}
 /// IMPORTANT: use forwarding reference to avoid unnecessary copies
 template <typename... TUPLES>
 constexpr auto tuple_cat(TUPLES&&... tuples)
 {
-    return nullptr;
+    return detail::tuple_cat_impl::f(std::forward<TUPLES>(tuples)...);
 }

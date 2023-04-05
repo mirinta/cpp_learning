@@ -2,18 +2,6 @@
 
 #include <type_traits>
 
-/// SIZE
-template <typename LIST>
-struct size;
-
-template <template <typename...> class LIST, typename... T0toN>
-struct size<LIST<T0toN...>> : public std::integral_constant<size_t, sizeof...(T0toN)>
-{
-};
-
-template <typename LIST>
-inline constexpr auto size_v = size<LIST>::value;
-
 /// IS EMPTY
 template <typename LIST>
 struct is_empty : std::false_type

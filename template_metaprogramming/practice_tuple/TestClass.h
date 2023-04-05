@@ -1,7 +1,6 @@
 #pragma once
 
 #include <iostream>
-#include <format>
 
 struct Counter
 {
@@ -14,16 +13,11 @@ struct Counter
 
 inline std::ostream& operator<<(std::ostream& os, const Counter& counter)
 {
-    os << std::format(
-        "| "
-        "default_constructs: {}, "
-        "copy_constructs: {}, "
-        "copy_assignments: {}, "
-        "move_constructs: {}, "
-        "move_assignments: {} "
-        "|",
-        counter.default_constructs, counter.copy_constructs, counter.copy_assignments,
-        counter.move_constructs, counter.move_assignments);
+    os << "| default_constructs: " << counter.default_constructs << ", "
+       << "copy_constructs: " << counter.copy_constructs << ", "
+       << "copy_assignments: " << counter.copy_assignments << ", "
+       << "move_constructs: " << counter.move_constructs << ", "
+       << "move_assignments: " << counter.move_assignments << "|";
     return os;
 }
 

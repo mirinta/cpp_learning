@@ -4,7 +4,7 @@
 
 /**
  * @brief Check if T is a pointer.
- * @note Pointers may have low-level cv-qualifiers.
+ * @note Pointers may have top-level cv-qualifiers.
  */
 template <typename T>
 struct is_pointer : public false_type
