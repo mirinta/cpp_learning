@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-namespace mrnt {
+namespace bits_of_q {
 /// IS EMPTY
 template <typename LIST>
 struct is_empty : std::false_type
@@ -169,4 +169,22 @@ struct contains : public any<same_as<SEARCH>::template predicate, LIST>
 
 template <typename SEARCH, typename LIST>
 inline constexpr bool contains_v = contains<SEARCH, LIST>::value;
-} // namespace mrnt
+
+/// STATIC_FOR
+template <int FIRST, int LAST, typename LAMBDA>
+constexpr void static_for(const LAMBDA& f)
+{
+    if constexpr (FIRST < LAST) {
+        f(std::integral_constant<int, FIRST>{});
+        static_for<FIRST + 1, LAST>(f);
+    }
+}
+
+/// NOT
+template <template <typename...> class PRED>
+struct not_
+{
+    template <typename... Ts>
+    using type = std::integral_constant<bool, !PRED<Ts...>::value>;
+};
+} // namespace bits_of_q

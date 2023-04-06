@@ -4,7 +4,7 @@
 
 #include "traits.h"
 
-namespace mrnt {
+namespace bits_of_q {
 template <typename... ELEMS>
 struct Tuple
 {
@@ -48,7 +48,10 @@ auto make_tuple(ELEMS&&... elems)
     return Tuple<std::unwrap_ref_decay_t<ELEMS>...>{std::forward<ELEMS>(elems)...};
 };
 
-/// Helper function to get the number of types in a tuple
+////////////////////////////////////////////////////////////
+///////////////////////  tuple_size  ///////////////////////
+////////////////////////////////////////////////////////////
+
 template <typename TUPLE>
 struct tuple_size;
 
@@ -59,6 +62,10 @@ struct tuple_size<Tuple<ELEMS...>> : std::integral_constant<size_t, sizeof...(EL
 
 template <typename TUPLE>
 inline constexpr auto tuple_size_v = tuple_size<TUPLE>::value;
+
+////////////////////////////////////////////////////////////
+///////////////////////////  get  //////////////////////////
+////////////////////////////////////////////////////////////
 
 namespace detail {
 template <size_t I, typename TUPLE>
@@ -119,41 +126,45 @@ constexpr decltype(auto) get(TUPLE&& tuple)
     return detail::get_impl<I, std::remove_cvref_t<TUPLE>>::get(std::forward<TUPLE>(tuple));
 }
 
-/// Helper function: to construct a tuple of references to the arguments in args suitable for
-/// forwarding as an argument to a function. The tuple has rvalue reference data members when
-/// rvalues are used as arguments, and otherwise has lvalue reference data members.
-/// @see std::forward_as_tuple
+////////////////////////////////////////////////////////////
+////////////////////  forward_as_tuple  ////////////////////
+////////////////////////////////////////////////////////////
+
 template <typename... Ts>
 constexpr auto forward_as_tuple(Ts&&... args) noexcept
 {
-    return Tuple<Ts&&...>(std::forward<Ts>(args)...);
+    return Tuple<Ts&&...>{std::forward<Ts>(args)...};
 }
 
+////////////////////////////////////////////////////////////
+///////////////////////  tuple_cat  ////////////////////////
+////////////////////////////////////////////////////////////
+
 namespace detail {
-template <typename FWD_INDEX_SEQ, typename TUPLE_INDEX_SEQ>
-struct concat_with_fwd_tuple;
-
-template <size_t... FWD_Is, size_t... TUPLE_Is>
-struct concat_with_fwd_tuple<std::index_sequence<FWD_Is...>, std::index_sequence<TUPLE_Is...>>
-{
-    template <typename FWD_TUPLE, typename TUPLE>
-    static constexpr auto f(FWD_TUPLE&& fwd, TUPLE&& tuple)
-    {
-        return mrnt::forward_as_tuple(get<FWD_Is>(std::forward<FWD_TUPLE>(fwd))...,
-                                      get<TUPLE_Is>(std::forward<TUPLE>(tuple))...);
-    }
-};
-
 template <typename INDEX_SEQ>
-struct make_tuple_from_fwd_tuple;
+struct make_tuple_from_forward_tuple;
 
 template <size_t... Is>
-struct make_tuple_from_fwd_tuple<std::index_sequence<Is...>>
+struct make_tuple_from_forward_tuple<std::index_sequence<Is...>>
 {
     template <typename FWD_TUPLE>
     static constexpr auto f(FWD_TUPLE&& fwd)
     {
         return Tuple{get<Is>(std::forward<FWD_TUPLE>(fwd))...};
+    }
+};
+
+template <typename FWD_INDEX_SEQ, typename TUPLE_INDEX_SEQ>
+struct concat_with_forward_tuple;
+
+template <size_t... FWD_Is, size_t... TUPLE_Is>
+struct concat_with_forward_tuple<std::index_sequence<FWD_Is...>, std::index_sequence<TUPLE_Is...>>
+{
+    template <typename FWD_TUPLE, typename TUPLE>
+    static constexpr auto f(FWD_TUPLE&& fwd, TUPLE&& tuple)
+    {
+        return forward_as_tuple(get<FWD_Is>(std::forward<FWD_TUPLE>(fwd))...,
+                                get<TUPLE_Is>(std::forward<TUPLE>(tuple))...);
     }
 };
 
@@ -211,17 +222,18 @@ struct tuple_cat_impl
     template <typename FWD_TUPLE, typename TUPLE, typename... TUPLES>
     static constexpr auto f(FWD_TUPLE&& fwd, TUPLE&& t, TUPLES&&... tuples)
     {
-        return f(concat_with_fwd_tuple<
+        return f(concat_with_forward_tuple<
                      std::make_index_sequence<tuple_size_v<std::remove_cvref_t<FWD_TUPLE>>>,
                      std::make_index_sequence<tuple_size_v<std::remove_cvref_t<TUPLE>>>>::
                      f(std::forward<FWD_TUPLE>(fwd), std::forward<TUPLE>(t)),
                  std::forward<TUPLES>(tuples)...);
     }
 
+    /// overload: recursion finished
     template <typename FWD_TUPLE>
     static constexpr auto f(FWD_TUPLE&& fwd)
     {
-        return make_tuple_from_fwd_tuple<std::make_index_sequence<
+        return make_tuple_from_forward_tuple<std::make_index_sequence<
             tuple_size_v<std::remove_cvref_t<FWD_TUPLE>>>>::f(std::forward<FWD_TUPLE>(fwd));
     }
 };
@@ -236,4 +248,92 @@ constexpr auto tuple_cat(TUPLES&&... tuples)
 {
     return detail::tuple_cat_impl::f(std::forward<TUPLES>(tuples)...);
 }
-} // namespace mrnt
+
+////////////////////////////////////////////////////////////
+///////////////////////  transform  ////////////////////////
+////////////////////////////////////////////////////////////
+
+namespace detail {
+template <typename TUPLE, typename FUNC, size_t... Is>
+constexpr auto transform_impl(TUPLE&& tuple, const FUNC& f, std::index_sequence<Is...>)
+{
+    return Tuple{f(get<Is>(std::forward<TUPLE>(tuple)))...};
+}
+} // namespace detail
+
+template <typename TUPLE, typename FUNC>
+constexpr auto transform(TUPLE&& tuple, const FUNC& f)
+{
+    return detail::transform_impl(
+        std::forward<TUPLE>(tuple), f,
+        std::make_index_sequence<tuple_size_v<std::remove_cvref_t<TUPLE>>>{});
+}
+
+////////////////////////////////////////////////////////////
+////////////////////  tuple_element_t  /////////////////////
+////////////////////////////////////////////////////////////
+
+template <typename TUPLE, size_t I>
+using tuple_element_t = at_t<TUPLE, I>;
+
+////////////////////////////////////////////////////////////
+/////////////////////////  filter  /////////////////////////
+////////////////////////////////////////////////////////////
+
+namespace detail {
+template <typename WRAP_TUPLE, size_t... Is>
+constexpr auto cat_tuple_content(WRAP_TUPLE&& wrap, std::index_sequence<Is...>)
+{
+    return tuple_cat(get<Is>(std::forward<WRAP_TUPLE>(wrap))...);
+}
+
+template <template <typename> class PREDICATE, typename TUPLE, size_t... Is>
+constexpr auto wrap_filtered(TUPLE&& tuple, std::index_sequence<Is...>)
+{
+    auto wrap_if_pred_matches = [&](auto i) {
+        if constexpr (PREDICATE<tuple_element_t<std::remove_cvref_t<TUPLE>, i.value>>::value) {
+            /// ********** IMPORTANT **********
+            /// intermediate result, it should be a forward tuple
+            return forward_as_tuple(get<i.value>(std::forward<TUPLE>(tuple)));
+        } else {
+            return Tuple<>{};
+        }
+    };
+    return Tuple{wrap_if_pred_matches(std::integral_constant<size_t, Is>{})...};
+}
+} // namespace detail
+
+template <template <typename> class PREDICATE, typename TUPLE>
+constexpr auto filter(TUPLE&& tuple)
+{
+    /// version 1:
+    /// 1. transform each element to a one-element tuple based on the given predicate:
+    /// - if true, return Tuple{elem};
+    /// - otherwise, return an empty tuple.
+    /// 2. concate all intermediate tuples to get the final result.
+    /// ********** IMPORTANT **********
+    /// The following implementation uses the "transform" function to pass the elements
+    /// to a lambda. It has the inherent problem that the lambda is unable to distinguish wheter the
+    /// element type is a value or a lvalue reference.
+    ///
+    /// SOLUTION:
+    /// - Add a tuple_element_t using the "at" function.
+    /// - Instead of using transform, create a similar function that executes the predicate on the
+    /// tuple_element_at at each index instead of using the decltype of the passed element.
+    //    auto wrap_if_pred_matches = [&]<typename ELEM>(ELEM&& e) {
+    //        if constexpr (PREDICATE<std::remove_cvref_t<ELEM>>::value) {
+    //            return forward_as_tuple(std::forward<ELEM>(e));
+    //        } else {
+    //            return Tuple<>{};
+    //        }
+    //    };
+    //    auto wrapped_tuple = transform(std::forward<TUPLE>(tuple), wrap_if_pred_matches);
+    /// version 2:
+    auto wrapped_tuple = detail::wrap_filtered<PREDICATE>(
+        std::forward<TUPLE>(tuple),
+        std::make_index_sequence<tuple_size_v<std::remove_cvref_t<TUPLE>>>{});
+    return detail::cat_tuple_content(
+        std::move(wrapped_tuple),
+        std::make_index_sequence<tuple_size_v<std::remove_cvref_t<TUPLE>>>{});
+}
+} // namespace bits_of_q
