@@ -141,16 +141,33 @@ constexpr auto forward_as_tuple(Ts&&... args) noexcept
 ////////////////////////////////////////////////////////////
 
 namespace detail {
-template <typename INDEX_SEQ>
+template <typename... TUPLES>
+struct tuple_cat_result;
+
+template <template <typename...> class TUPLE, typename... T1s, typename... T2s, typename... TUPLES>
+struct tuple_cat_result<TUPLE<T1s...>, TUPLE<T2s...>, TUPLES...>
+    : public tuple_cat_result<TUPLE<T1s..., T2s...>, TUPLES...>
+{
+};
+
+template <typename TUPLE>
+struct tuple_cat_result<TUPLE> : public std::type_identity<TUPLE>
+{
+};
+
+template <typename... TUPLES>
+using tuple_cat_result_t = typename tuple_cat_result<TUPLES...>::type;
+
+template <typename RESULT_TUPLE, typename INDEX_SEQ>
 struct make_tuple_from_forward_tuple;
 
-template <size_t... Is>
-struct make_tuple_from_forward_tuple<std::index_sequence<Is...>>
+template <typename RESULT_TUPLE, size_t... Is>
+struct make_tuple_from_forward_tuple<RESULT_TUPLE, std::index_sequence<Is...>>
 {
     template <typename FWD_TUPLE>
     static constexpr auto f(FWD_TUPLE&& fwd)
     {
-        return Tuple{get<Is>(std::forward<FWD_TUPLE>(fwd))...};
+        return RESULT_TUPLE{get<Is>(std::forward<FWD_TUPLE>(fwd))...};
     }
 };
 
@@ -168,6 +185,7 @@ struct concat_with_forward_tuple<std::index_sequence<FWD_Is...>, std::index_sequ
     }
 };
 
+template <typename RESULT_TUPLE>
 struct tuple_cat_impl
 {
     /// version 1: concate only two tuples using two corresponding index sequences
@@ -233,8 +251,9 @@ struct tuple_cat_impl
     template <typename FWD_TUPLE>
     static constexpr auto f(FWD_TUPLE&& fwd)
     {
-        return make_tuple_from_forward_tuple<std::make_index_sequence<
-            tuple_size_v<std::remove_cvref_t<FWD_TUPLE>>>>::f(std::forward<FWD_TUPLE>(fwd));
+        return make_tuple_from_forward_tuple<
+            RESULT_TUPLE, std::make_index_sequence<tuple_size_v<std::remove_cvref_t<FWD_TUPLE>>>>::
+            f(std::forward<FWD_TUPLE>(fwd));
     }
 };
 } // namespace detail
@@ -246,7 +265,8 @@ struct tuple_cat_impl
 template <typename... TUPLES>
 constexpr auto tuple_cat(TUPLES&&... tuples)
 {
-    return detail::tuple_cat_impl::f(std::forward<TUPLES>(tuples)...);
+    return detail::tuple_cat_impl<detail::tuple_cat_result_t<std::remove_cvref_t<TUPLES>...>>::f(
+        std::forward<TUPLES>(tuples)...);
 }
 
 ////////////////////////////////////////////////////////////
@@ -281,6 +301,30 @@ using tuple_element_t = at_t<TUPLE, I>;
 ////////////////////////////////////////////////////////////
 
 namespace detail {
+template <typename TUPLE, template <typename> class PREDICATE>
+struct filter_result;
+
+template <template <typename...> class TUPLE, typename... ELEMS,
+          template <typename> class PREDICATE>
+struct filter_result<TUPLE<ELEMS...>, PREDICATE>
+{
+    template <typename ELEM>
+    struct wrap_if_pred_matches
+    {
+        using type = std::conditional_t<PREDICATE<ELEM>::value, TUPLE<ELEM>, TUPLE<>>;
+    };
+    using type = tuple_cat_result_t<typename wrap_if_pred_matches<ELEMS>::type...>;
+};
+
+template <typename TUPLE, template <typename> class PREDICATE>
+using filter_result_t = typename filter_result<TUPLE, PREDICATE>::type;
+
+template <typename RESULT_TUPLE, typename WRAP_TUPLE, size_t... Is>
+constexpr auto cat_tuple_content_as(WRAP_TUPLE&& wrap, std::index_sequence<Is...>)
+{
+    return tuple_cat_impl<RESULT_TUPLE>::f(get<Is>(std::forward<WRAP_TUPLE>(wrap))...);
+}
+
 template <typename WRAP_TUPLE, size_t... Is>
 constexpr auto cat_tuple_content(WRAP_TUPLE&& wrap, std::index_sequence<Is...>)
 {
@@ -332,7 +376,8 @@ constexpr auto filter(TUPLE&& tuple)
     auto wrapped_tuple = detail::wrap_filtered<PREDICATE>(
         std::forward<TUPLE>(tuple),
         std::make_index_sequence<tuple_size_v<std::remove_cvref_t<TUPLE>>>{});
-    return detail::cat_tuple_content(
+    return detail::cat_tuple_content_as<
+        detail::filter_result_t<std::remove_cvref_t<TUPLE>, PREDICATE>>(
         std::move(wrapped_tuple),
         std::make_index_sequence<tuple_size_v<std::remove_cvref_t<TUPLE>>>{});
 }

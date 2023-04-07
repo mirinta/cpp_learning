@@ -165,5 +165,86 @@ int main()
         ASSERT((std::is_same_v<decltype(tup2), Tuple<int, int>>));
     });
 
+    // Homework: step 2. Create a tuple_cat_result_t metafunction in the detail namespace to help to
+    // determine the expected output type of a tuple_cat operation on two tuples Hint: This is
+    // similar to the push_back operation from Metaprogramming.h, only difference is that we
+    // "push_back" the elements of the second tuple, not the whole tuple
+    Tester::test("tuple_cat_result_2_inputs", []() {
+        static_assert(
+            std::is_same_v<detail::tuple_cat_result_t<Tuple<int, int&, int>, Tuple<int&&>>,
+                           Tuple<int, int&, int, int&&>>);
+    });
+
+    // Homework: step 3. Update tuple_cat_result_t metafunction to handle more than 2 inputs
+    // Hint: Recursion should do the trick
+    Tester::test("tuple_cat_result", []() {
+        static_assert(
+            std::is_same_v<detail::tuple_cat_result_t<Tuple<double&, double>, Tuple<int, int&, int>,
+                                                      Tuple<int&&>>,
+                           Tuple<double&, double, int, int&, int, int&&>>);
+    });
+
+    // Homework: step 4. Make tuple_cat work with references.
+    // The test below tests the concatenation of tuples with lvalue and rvalue references. Current
+    // implementation ignores these references and will create an output tuple with normal integers.
+    // std::tuple_cat is included for reference so you can compare the expected outcome.
+    // Hint: use the tuple_cat_result_t metafunction to ensure the return type of
+    // make_tuple_from_fwd_tuple is correct Note: some filter tests may start failing after updating
+    // tuple_cat to correctly handle references. This is expected as the current filter
+    // implementation implicitly assumes that tuple_cat strips references from the element type. You
+    // may want to temporarily comment out the failing filter tests. We will re-enable them in step
+    // 5
+    Tester::test("tuple_cat_with_refs", []() {
+        int i = 10;
+        int j = 11;
+        Tuple<int, int&, int> tup{4, i, 11};
+        Tuple<int&&> tup2{std::move(j)};
+        int j2 = 11;
+        std::tuple<int, int&, int> stup{4, i, 11};
+        std::tuple<int&&> stup2{std::move(j2)};
+
+        auto t1_2 = tuple_cat(std::move(tup), std::move(tup2));
+        auto st1_2 = std::tuple_cat(std::move(stup), std::move(stup2));
+
+        // static_assert(std::is_same_v<decltype(t1_2), Tuple<int, int &, int, int &&>>);
+        // static_assert(std::is_same_v<decltype(st1_2), std::tuple<int, int &, int, int &&>>);
+        ASSERT((std::is_same_v<decltype(t1_2), Tuple<int, int&, int, int&&>>));
+        ASSERT((std::is_same_v<decltype(st1_2), std::tuple<int, int&, int, int&&>>));
+    });
+
+    // Homework step5:
+    // In order to make filter work correctly with reference type elements, introduce a
+    // tuple_result_t metafunction in the detail namespace earlier changes to execute predicate on
+    // correct type. Hint: you can use a similar approach as in the current filter implementation
+    // when building the result type: Wrapping element types that pass the filter into a tuple type
+    // and inserting empty tuples for those that don't (use if_ from Metaprogramming.h). Then pass
+    // that type to the tuple_cat_result_t metafunction created in step 2.
+    Tester::test("filter_result", []() {
+        static_assert(
+            std::is_same_v<detail::filter_result_t<Tuple<int, double, unsigned>, std::is_integral>,
+                           Tuple<int, unsigned>>);
+        static_assert(
+            std::is_same_v<detail::filter_result_t<Tuple<int, int&, int&&>, std::is_reference>,
+                           Tuple<int&, int&&>>);
+    });
+
+    // Homework step6: Make filter compatible with refences using the now reference-compatible
+    // tuple_cat function and the filter_result_t metafunction from step 5. Hint: Update
+    // detail::tuple_cat_content to directly use tuple_cat_impl with the correct result tuple type.
+    // Note: if you commented out some of the filter tests in step 4, make sure to re-enable them.
+    // They should now pass.
+    Tester::test("tuple_filter_with_refs", []() {
+        int i = 10;
+        Tuple<int, int&, int> tup{4, i, 11};
+
+        auto tup2 = filter<boq::not_<std::is_reference>::type>(std::forward<decltype(tup)>(tup));
+        // static_assert(std::is_same_v<decltype(tup2), Tuple<int, int>>);
+        ASSERT((std::is_same_v<decltype(tup2), Tuple<int, int>>));
+
+        auto tup3 = filter<std::is_reference>(std::forward<decltype(tup)>(tup));
+        // static_assert(std::is_same_v<decltype(tup3), Tuple<int &>>);
+        ASSERT((std::is_same_v<decltype(tup3), Tuple<int&>>));
+    });
+
     return 0;
 }
