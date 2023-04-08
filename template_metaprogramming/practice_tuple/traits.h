@@ -184,7 +184,9 @@ constexpr void static_for(const LAMBDA& f)
 template <template <typename...> class PRED>
 struct not_
 {
-    template <typename... Ts>
-    using type = std::integral_constant<bool, !PRED<Ts...>::value>;
+    template <typename T>
+    struct predicate : public std::bool_constant<!bool(PRED<T>::value)>
+    {
+    };
 };
 } // namespace bits_of_q

@@ -138,7 +138,8 @@ int main()
         auto&& tup = builder.build(Tuple{42, 2.3F, c, 3.4, 12U});
         auto&& ref_tup = builder.build(Tuple{42, 2.3F, c2, 3.4, 12U});
 
-        auto tup2 = filter<boq::not_<std::is_integral>::type>(std::forward<decltype(tup)>(tup));
+        auto tup2 =
+            filter<boq::not_<std::is_integral>::predicate>(std::forward<decltype(tup)>(tup));
         auto ref_tup2 = std::forward<decltype(ref_tup)>(ref_tup);
 
         static_assert(std::is_same_v<std::remove_cvref_t<decltype(tup2)>,
@@ -160,7 +161,8 @@ int main()
         int i = 10;
         Tuple<int, int&, int> tup{4, i, 11};
 
-        auto tup2 = filter<boq::not_<std::is_reference>::type>(std::forward<decltype(tup)>(tup));
+        auto tup2 =
+            filter<boq::not_<std::is_reference>::predicate>(std::forward<decltype(tup)>(tup));
         // static_assert(std::is_same_v<decltype(tup2), Tuple<int, int>>);
         ASSERT((std::is_same_v<decltype(tup2), Tuple<int, int>>));
     });
@@ -237,7 +239,8 @@ int main()
         int i = 10;
         Tuple<int, int&, int> tup{4, i, 11};
 
-        auto tup2 = filter<boq::not_<std::is_reference>::type>(std::forward<decltype(tup)>(tup));
+        auto tup2 =
+            filter<boq::not_<std::is_reference>::predicate>(std::forward<decltype(tup)>(tup));
         // static_assert(std::is_same_v<decltype(tup2), Tuple<int, int>>);
         ASSERT((std::is_same_v<decltype(tup2), Tuple<int, int>>));
 
