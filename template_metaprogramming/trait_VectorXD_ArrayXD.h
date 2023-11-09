@@ -1,3 +1,8 @@
+#include <array>
+#include <concepts>
+#include <type_traits>
+#include <vector>
+
 namespace internal {
 template <typename T, size_t D>
     requires(D > 0)
