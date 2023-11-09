@@ -11,7 +11,7 @@ struct VectorXD<T, 1> : std::type_identity<std::vector<T>>
 };
 
 template <typename T, size_t... Ds>
-    requires(sizeof...(Ds) > 0)
+    requires(sizeof...(Ds) > 0 && ((Ds > 0) && ...))
 struct ArrayXD;
 
 template <typename T, size_t D0, size_t... D1toN>
