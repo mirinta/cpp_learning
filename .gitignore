@@ -1,2 +1,5 @@
 *.user
 .vscode/
+*.exe
+*.dSYM
+build
