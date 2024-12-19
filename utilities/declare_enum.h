@@ -38,27 +38,27 @@ constexpr std::array<std::string_view, N> split_enum_strings(std::string_view s)
 }
 } // namespace details
 
-#define DECLARE_ENUM(classname, ...)                                                 \
-    enum class classname { __VA_ARGS__ };                                            \
-                                                                                     \
-    static constexpr std::string_view EnumKeyName(classname e)                       \
-    {                                                                                \
-        constexpr auto count = details::count_commas(#__VA_ARGS__) + 1;              \
-        constexpr auto strings = details::split_enum_strings<count>(#__VA_ARGS__);   \
-        return strings[details::to_underlying(e)];                                   \
-    }                                                                                \
-                                                                                     \
-    template <typename T, typename = std::enable_if_t<std::is_same_v<T, classname>>> \
-    static constexpr size_t EnumCount(classname e = {})                              \
-    {                                                                                \
-        return details::count_commas(#__VA_ARGS__) + 1;                              \
-    }                                                                                \
-                                                                                     \
-    template <typename T, typename = std::enable_if_t<std::is_same_v<T, classname>>> \
-    static constexpr std::string_view EnumName(classname e = {})                     \
-    {                                                                                \
-        return #classname;                                                           \
-    };
+#define DECLARE_ENUM(classname, ...)                                                     \
+    enum class classname { __VA_ARGS__ };                                                \
+                                                                                         \
+    template <typename Enum, std::enable_if_t<std::is_same_v<Enum, classname>, int> = 0> \
+    static constexpr size_t EnumCount(classname e = {})                                  \
+    {                                                                                    \
+        return details::count_commas(#__VA_ARGS__) + 1;                                  \
+    }                                                                                    \
+                                                                                         \
+    template <typename Enum, std::enable_if_t<std::is_same_v<Enum, classname>, int> = 0> \
+    static constexpr std::string_view EnumName(classname e = {})                         \
+    {                                                                                    \
+        return #classname;                                                               \
+    };                                                                                   \
+                                                                                         \
+    static constexpr std::string_view EnumKeyName(classname e)                           \
+    {                                                                                    \
+        constexpr auto count = details::count_commas(#__VA_ARGS__) + 1;                  \
+        constexpr auto strings = details::split_enum_strings<count>(#__VA_ARGS__);       \
+        return strings[details::to_underlying(e)];                                       \
+    }
 
 DECLARE_ENUM(COLOR, RED, BLUE, YELLOW)
 static_assert(EnumKeyName(COLOR::YELLOW) == "YELLOW", "");
@@ -72,8 +72,13 @@ static_assert(EnumName<Type>() == "Type", "");
 
 struct Test
 {
-    DECLARE_ENUM(ERROR, NONE, ERROR1)
+    DECLARE_ENUM(ERROR, NONE, ERROR1, ERROR2)
+    DECLARE_ENUM(STATUS, READY, RUNNING)
 };
 static_assert(Test::EnumKeyName(Test::ERROR::NONE) == "NONE", "");
-static_assert(Test::EnumCount<Test::ERROR>() == 2, "");
+static_assert(Test::EnumCount<Test::ERROR>() == 3, "");
 static_assert(Test::EnumName<Test::ERROR>() == "ERROR", "");
+
+static_assert(Test::EnumKeyName(Test::STATUS::RUNNING) == "RUNNING", "");
+static_assert(Test::EnumCount<Test::STATUS>() == 2, "");
+static_assert(Test::EnumName<Test::STATUS>() == "STATUS", "");
