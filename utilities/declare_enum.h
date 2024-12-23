@@ -42,13 +42,13 @@ constexpr std::array<std::string_view, N> split_enum_strings(std::string_view s)
     enum class classname { __VA_ARGS__ };                                                \
                                                                                          \
     template <typename Enum, std::enable_if_t<std::is_same_v<Enum, classname>, int> = 0> \
-    static constexpr size_t EnumCount(classname e = {})                                  \
+    static constexpr size_t EnumCount([[maybe_unused]] classname e = {})                                  \
     {                                                                                    \
         return details::count_commas(#__VA_ARGS__) + 1;                                  \
     }                                                                                    \
                                                                                          \
     template <typename Enum, std::enable_if_t<std::is_same_v<Enum, classname>, int> = 0> \
-    static constexpr std::string_view EnumName(classname e = {})                         \
+    static constexpr std::string_view EnumName([[maybe_unused]] classname e = {})                         \
     {                                                                                    \
         return #classname;                                                               \
     };                                                                                   \
