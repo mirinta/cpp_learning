@@ -1,0 +1,50 @@
+@startuml
+
+abstract class ShapeVisitor {
+  + {abstract} ~ShapeVisitor()
+  + {abstract} visit(const Circle&) const
+  + {abstract} visit(const Square&) const
+}
+
+abstract class Shape {
+  + {abstract} ~Shape()
+  + {abstract} accept(const ShapeVisitor&) const
+}
+
+class Circle {
+  + accept(const ShapeVisitor&) const
+}
+
+class Square {
+  + accept(const ShapeVisitor&)
+}
+
+class SerializeVisitor {
+  + visit(const Circle&) const
+  + visit(const Square&) const
+}
+
+class RenderVisitor {
+  + visit(const Circle&) const
+  + visit(const Square&) const
+}
+
+Shape <|-- Circle
+Shape <|-- Square
+
+ShapeVisitor <|-- SerializeVisitor
+ShapeVisitor <|-- RenderVisitor
+
+Shape ..> ShapeVisitor
+ShapeVisitor ..> Circle
+ShapeVisitor ..> Square
+
+note left of Circle::accept
+    v->visit(this)
+end note
+
+note right of Square::accept
+    v->visit(this)
+end note
+
+@enduml
