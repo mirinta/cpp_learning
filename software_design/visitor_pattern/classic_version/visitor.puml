@@ -19,12 +19,12 @@ class Square {
   + accept(const ShapeVisitor&)
 }
 
-class SerializeVisitor {
+class ShapeSerializer {
   + visit(const Circle&) const
   + visit(const Square&) const
 }
 
-class RenderVisitor {
+class ShapeRender {
   + visit(const Circle&) const
   + visit(const Square&) const
 }
@@ -32,8 +32,8 @@ class RenderVisitor {
 Shape <|-- Circle
 Shape <|-- Square
 
-ShapeVisitor <|-- SerializeVisitor
-ShapeVisitor <|-- RenderVisitor
+ShapeVisitor <|-- ShapeSerializer
+ShapeVisitor <|-- ShapeRender
 
 Shape ..> ShapeVisitor
 ShapeVisitor ..> Circle
