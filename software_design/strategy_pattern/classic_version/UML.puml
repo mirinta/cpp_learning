@@ -46,8 +46,8 @@ class MetalSquareStrategy {
 Shape <|-- Circle
 Shape <|-- Square
 
-Circle *-- DrawCircleStrategy
-Square *-- DrawSquareStrategy
+Circle o-- DrawCircleStrategy
+Square o-- DrawSquareStrategy
 
 DrawCircleStrategy <|-- OpenGLCircleStrategy
 DrawSquareStrategy <|-- OpenGLSquareStrategy
