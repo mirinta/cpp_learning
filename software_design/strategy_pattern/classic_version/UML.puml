@@ -1,8 +1,8 @@
 @startuml
 
 abstract class Shape {
-  + {abstract} ~Shape()
-  + {abstract} virtual void draw() const = 0
+  + virtual ~Shape()
+  + virtual void draw() const = 0
 }
 
 class Circle {
@@ -18,8 +18,8 @@ class Square {
 }
 
 abstract class DrawCircleStrategy {
-  + {abstract} ~DrawCircleStrategy()
-  + {abstract} virtual void draw(const Circle&) const = 0
+  + virtual ~DrawCircleStrategy()
+  + virtual void draw(const Circle&) const = 0
 }
 
 class OpenGLCircleStrategy {
@@ -31,8 +31,8 @@ class MetalCircleStrategy {
 }
 
 abstract class DrawSquareStrategy {
-  + {abstract} ~DrawSquareStrategy()
-  + {abstract} virtual void draw(const Square&) const = 0
+  + virtual ~DrawSquareStrategy()
+  + virtual void draw(const Square&) const = 0
 }
 
 class OpenGLSquareStrategy {
