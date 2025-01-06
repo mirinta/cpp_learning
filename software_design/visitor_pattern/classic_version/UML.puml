@@ -1,32 +1,32 @@
 @startuml
 
 abstract class ShapeVisitor {
-  + {abstract} ~ShapeVisitor()
-  + {abstract} visit(const Circle&) const
-  + {abstract} visit(const Square&) const
+  + virtual ~ShapeVisitor()
+  + virtual void visit(const Circle&) const
+  + virtual void visit(const Square&) const
 }
 
 abstract class Shape {
-  + {abstract} ~Shape()
-  + {abstract} accept(const ShapeVisitor&) const
+  + virtual ~Shape()
+  + virtual void accept(const ShapeVisitor&) const
 }
 
 class Circle {
-  + accept(const ShapeVisitor&) const
+  + void accept(const ShapeVisitor&) const
 }
 
 class Square {
-  + accept(const ShapeVisitor&)
+  + void accept(const ShapeVisitor&)
 }
 
 class ShapeSerializer {
-  + visit(const Circle&) const
-  + visit(const Square&) const
+  + void visit(const Circle&) const
+  + void visit(const Square&) const
 }
 
 class ShapeRender {
-  + visit(const Circle&) const
-  + visit(const Square&) const
+  + void visit(const Circle&) const
+  + void visit(const Square&) const
 }
 
 Shape <|-- Circle
