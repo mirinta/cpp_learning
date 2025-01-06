@@ -1,0 +1,66 @@
+@startuml
+
+abstract class Shape {
+  + {abstract} ~Shape()
+  + {abstract} virtual void draw() const = 0
+}
+
+class Circle {
+  + Circle(std::unique_ptr<DrawCircleStrategy>)
+  + void draw() const override
+  - std::unique_ptr<DrawCircleStrategy> drawer
+}
+
+class Square {
+  + Square(std::unique_ptr<DrawSquareStrategy>)
+  + void draw() const override
+  - std::unique_ptr<DrawSquareStrategy> drawer
+}
+
+abstract class DrawCircleStrategy {
+  + {abstract} ~DrawCircleStrategy()
+  + {abstract} virtual void draw(const Circle&) const = 0
+}
+
+class OpenGLCircleStrategy {
+  + void draw(const Circle&) const override
+}
+
+class MetalCircleStrategy {
+  + void draw(const Circle&) const override
+}
+
+abstract class DrawSquareStrategy {
+  + {abstract} ~DrawSquareStrategy()
+  + {abstract} virtual void draw(const Square&) const = 0
+}
+
+class OpenGLSquareStrategy {
+  + void draw(const Square&) const override
+}
+
+class MetalSquareStrategy {
+  + void draw(const Square&) const override
+}
+
+Shape <|-- Circle
+Shape <|-- Square
+
+Circle *-- DrawCircleStrategy
+Square *-- DrawSquareStrategy
+
+DrawCircleStrategy <|-- OpenGLCircleStrategy
+DrawSquareStrategy <|-- OpenGLSquareStrategy
+
+DrawCircleStrategy <|-- MetalCircleStrategy
+DrawSquareStrategy <|-- MetalSquareStrategy
+
+note left of Circle::draw()
+    drawer->draw(*this)
+end note
+
+note left of Square::draw()
+    drawer->draw(*this)
+end note
+
+@enduml
