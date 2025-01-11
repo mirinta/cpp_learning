@@ -1,0 +1,32 @@
+@startuml
+
+class Calculator {
+  + int compute(std::unique_ptr<CalculatorCommand> command);
+  + void undoLast();
+  + int result() const;
+  + void clear();
+  - int current;
+  - std::stack<std::unique_ptr<CalculatorCommand>> stack;
+}
+
+abstract class CalculatorCommand {
+  + virtual ~CalculatorCommand() = default;
+  + virtual int execute(int val) const = 0;
+  + virtual void undo(int val) const = 0;
+}
+
+class Add {
+  + int execute(int val) const override;
+  + void undo(int val) const override;
+}
+
+class Subtract {
+  + int execute(int val) const override;
+  + void undo(int val) const override;
+}
+
+Calculator o--> CalculatorCommand
+CalculatorCommand <|-- Add
+CalculatorCommand <|-- Subtract
+
+@enduml

@@ -1,46 +1,46 @@
 @startuml
 
 abstract class Shape {
-  + virtual ~Shape()
-  + virtual void draw() const = 0
+  + virtual ~Shape() = default;
+  + virtual void draw() const = 0;
 }
 
 class Circle {
-  + Circle(std::unique_ptr<DrawCircleStrategy>)
-  + void draw() const override
-  - std::unique_ptr<DrawCircleStrategy> drawer
+  + Circle(std::unique_ptr<DrawCircleStrategy>);
+  + void draw() const override;
+  - std::unique_ptr<DrawCircleStrategy> drawer;
 }
 
 class Square {
-  + Square(std::unique_ptr<DrawSquareStrategy>)
-  + void draw() const override
-  - std::unique_ptr<DrawSquareStrategy> drawer
+  + Square(std::unique_ptr<DrawSquareStrategy>);
+  + void draw() const override;
+  - std::unique_ptr<DrawSquareStrategy> drawer;
 }
 
 abstract class DrawCircleStrategy {
-  + virtual ~DrawCircleStrategy()
-  + virtual void draw(const Circle&) const = 0
+  + virtual ~DrawCircleStrategy() = default;;
+  + virtual void draw(const Circle&) const = 0;
 }
 
 class OpenGLCircleStrategy {
-  + void draw(const Circle&) const override
+  + void draw(const Circle&) const override;
 }
 
 class MetalCircleStrategy {
-  + void draw(const Circle&) const override
+  + void draw(const Circle&) const override;
 }
 
 abstract class DrawSquareStrategy {
-  + virtual ~DrawSquareStrategy()
-  + virtual void draw(const Square&) const = 0
+  + virtual ~DrawSquareStrategy() = default;
+  + virtual void draw(const Square&) const = 0;
 }
 
 class OpenGLSquareStrategy {
-  + void draw(const Square&) const override
+  + void draw(const Square&) const override;
 }
 
 class MetalSquareStrategy {
-  + void draw(const Square&) const override
+  + void draw(const Square&) const override;
 }
 
 Shape <|-- Circle

@@ -9,13 +9,13 @@ class Square {
 note "using Shape = std::variant<Circle, Square>;" as Shape
 
 struct ShapeRender {
-  + void operator()(const Circle&) const
-  + void operator()(const Square&) const
+  + void operator()(const Circle&) const;
+  + void operator()(const Square&) const;
 }
 
 struct ShapeSerializer {
-  + void operator()(const Circle&) const
-  + void operator()(const Square&) const
+  + void operator()(const Circle&) const;
+  + void operator()(const Square&) const;
 }
 
 Shape ..> Circle
