@@ -16,17 +16,37 @@ abstract class CalculatorCommand {
 }
 
 class Add {
+  + Add(int operand);
   + int execute(int val) const override;
   + void undo(int val) const override;
+  - int operand;
 }
 
 class Subtract {
+  + Subtract(int operand);
   + int execute(int val) const override;
   + void undo(int val) const override;
+  - int operand;
 }
 
 Calculator o--> CalculatorCommand
 CalculatorCommand <|-- Add
 CalculatorCommand <|-- Subtract
+
+note left of Add::execute
+  return val + operand;
+end note
+
+note left of Add::undo
+  return val - operand;
+end note
+
+note right of Subtract::execute
+  return val - operand;
+end note
+
+note right of Subtract::undo
+  return val + operand;
+end note
 
 @enduml
