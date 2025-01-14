@@ -1,0 +1,53 @@
+@startuml
+
+abstract class Shape {
+  + virtual ~Shape() = default;
+  + virtual void draw() const = 0;
+}
+
+class Circle {
+  + Circle(std::function<const Circle&>);
+  + void draw() const override;
+  - std::function<void(const Circle&)> drawer;
+}
+
+class Square {
+  + Square(std::function<void(const Square&)>);
+  + void draw() const override;
+  - std::function<void(const Square&)> drawer;
+}
+
+class OpenGLCircleStrategy {
+  + void operator()(const Circle&) const;
+}
+
+class MetalCircleStrategy {
+  + void operator()(const Circle&) const;
+}
+
+class OpenGLSquareStrategy {
+  + void operator()(const Square&) const;
+}
+
+class MetalSquareStrategy {
+  + void operator()(const Square&) const;
+}
+
+Shape <|-- Circle
+Shape <|-- Square
+
+Circle o--  OpenGLCircleStrategy
+Circle o--  MetalCircleStrategy
+
+Square o-- OpenGLSquareStrategy
+Square o-- MetalSquareStrategy
+
+note left of Circle::draw()
+    drawer(*this)
+end note
+
+note left of Square::draw()
+    drawer(*this)
+end note
+
+@enduml
