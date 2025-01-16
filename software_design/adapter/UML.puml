@@ -1,0 +1,25 @@
+@startuml
+
+abstract class Adapter {
+  + virtual ~Adapter() = default;
+  + virtual RequiredType clientRequiredData() const =  0;
+}
+
+class ConcreteAdapter {
+  + ConcreteAdapter(Service service);
+  + RequiredType clientRequiredData() const override;
+  - Service service;
+}
+
+class Service {
+  + Data getData() const;
+}
+
+Adapter <|-- ConcreteAdapter
+ConcreteAdapter o-- Service
+
+note left of ConcreteAdapter::clientRequiredData
+    return convert(service.getData());
+end note
+
+@enduml
