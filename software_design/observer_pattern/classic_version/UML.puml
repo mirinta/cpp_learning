@@ -1,0 +1,46 @@
+@startuml
+
+abstract class Observer<template<typename Subject, typename StateTag>> {
+  + virtual ~Observer() = default;
+  + virtual void update(const Subject&, StateTag) = 0;
+}
+
+class "Observer<Person, Person::StateChange>" {
+  + virtual void update(const Person&, Person::StateChange) = 0;
+}
+
+class NameObserver {
+  + void update(const Person&, Person::StateChange) override;
+}
+
+class AddressObserver {
+  + void update(const Person&, Person::StateChange) override;
+}
+
+class Person {
+  + enum StateChange {ForenameChanged, SurnameChanged, AddressChanged}
+
+  + bool attach(PersonObserver*);
+  + bool detach(PersonObserver*);
+  + void notify(StateChange);
+
+  + const std::string& forename() const;
+  + const std::string& surname() const;
+  + const std::string& address() const;
+
+  + void setForename(const std::string&);
+  + void setSurname(const std::string&);
+  + void setAddress(const std::string&);
+
+  - std::string forename_;
+  - std::string surname_;
+  - std::string address_;
+  - std::unordered_set<PersonObserver*> observers_;
+}
+
+Observer <-- "Observer<Person, Person::StateChange>"
+"Observer<Person, Person::StateChange>" <|-- NameObserver
+"Observer<Person, Person::StateChange>" <|-- AddressObserver
+Person o-- "Observer<Person, Person::StateChange>"
+
+@enduml
