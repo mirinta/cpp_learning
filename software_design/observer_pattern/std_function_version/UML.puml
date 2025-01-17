@@ -1,0 +1,48 @@
+@startuml
+
+class Observer<template<typename Subject, typename StateTag>> {
+  + using OnUpdate = std::function<void(const Subject&, StateTag)>;
+  + explicit Observer(OnUpdate onUpdate);
+  + void update(const Subject& subject, StateTag property);
+
+  - OnUpdate onUpdate_;
+}
+
+note "using PersonObserver = Observer<Person, Person::StateChange>;" as PersonObserver
+
+class Person {
+  + enum StateChange { ForenameChanged, SurnameChanged, AddressChanged };
+
+  + bool attach(PersonObserver*);
+  + bool detach(PersonObserver*);
+  + void notify(StateChange);
+
+  + const std::string& forename() const;
+  + const std::string& surname() const;
+  + const std::string& address() const;
+
+  + void setForename(const std::string&);
+  + void setSurname(const std::string&);
+  + void setAddress(const std::string&);
+
+  - std::string forename_;
+  - std::string surname_;
+  - std::string address_;
+  - std::unordered_set<PersonObserver*> observers_;
+}
+
+note "PersonObserver nameObserver([](const Person&, Person::StateChange) {});" as NameObserver
+
+note "PersonObserver addressObserver([](const Person&, Person::StateChange) {});" as AddressObserver
+
+Observer <-- PersonObserver
+Person o-- PersonObserver
+
+PersonObserver <-- NameObserver
+PersonObserver <-- AddressObserver
+
+note left of Observer::update
+    onUpdate_(subject, property)
+end note
+
+@enduml
