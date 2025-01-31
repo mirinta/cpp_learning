@@ -1,3 +1,5 @@
+#include <vector>
+
 #include "visitors.h"
 
 void renderShapes(const std::vector<Shape>& shapes)

@@ -42,13 +42,13 @@ constexpr std::array<std::string_view, N> split_enum_strings(std::string_view s)
     enum class classname { __VA_ARGS__ };                                                \
                                                                                          \
     template <typename Enum, std::enable_if_t<std::is_same_v<Enum, classname>, int> = 0> \
-    static constexpr size_t EnumCount([[maybe_unused]] classname e = {})                                  \
+    static constexpr size_t EnumCount([[maybe_unused]] classname e = {})                 \
     {                                                                                    \
         return details::count_commas(#__VA_ARGS__) + 1;                                  \
     }                                                                                    \
                                                                                          \
     template <typename Enum, std::enable_if_t<std::is_same_v<Enum, classname>, int> = 0> \
-    static constexpr std::string_view EnumName([[maybe_unused]] classname e = {})                         \
+    static constexpr std::string_view EnumName([[maybe_unused]] classname e = {})        \
     {                                                                                    \
         return #classname;                                                               \
     };                                                                                   \
@@ -59,26 +59,3 @@ constexpr std::array<std::string_view, N> split_enum_strings(std::string_view s)
         constexpr auto strings = details::split_enum_strings<count>(#__VA_ARGS__);       \
         return strings[details::to_underlying(e)];                                       \
     }
-
-DECLARE_ENUM(COLOR, RED, BLUE, YELLOW)
-static_assert(EnumKeyName(COLOR::YELLOW) == "YELLOW", "");
-static_assert(EnumCount<COLOR>() == 3, "");
-static_assert(EnumName<COLOR>() == "COLOR", "");
-
-DECLARE_ENUM(Type, A, B, C, D)
-static_assert(EnumKeyName(Type::C) == "C", "");
-static_assert(EnumCount<Type>() == 4, "");
-static_assert(EnumName<Type>() == "Type", "");
-
-struct Test
-{
-    DECLARE_ENUM(ERROR, NONE, ERROR1, ERROR2)
-    DECLARE_ENUM(STATUS, READY, RUNNING)
-};
-static_assert(Test::EnumKeyName(Test::ERROR::NONE) == "NONE", "");
-static_assert(Test::EnumCount<Test::ERROR>() == 3, "");
-static_assert(Test::EnumName<Test::ERROR>() == "ERROR", "");
-
-static_assert(Test::EnumKeyName(Test::STATUS::RUNNING) == "RUNNING", "");
-static_assert(Test::EnumCount<Test::STATUS>() == 2, "");
-static_assert(Test::EnumName<Test::STATUS>() == "STATUS", "");

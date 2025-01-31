@@ -1,3 +1,6 @@
+#include <memory>
+#include <vector>
+
 #include "shapes.h"
 #include "strategies.h"
 
