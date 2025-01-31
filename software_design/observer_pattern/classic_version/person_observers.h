@@ -10,7 +10,8 @@ public:
 
     void update(const Person&, Person::StateChange property) const override
     {
-        if (property == Person::ForenameChanged || property == Person::SurnameChanged) {
+        if (property == Person::StateChange::ForenameChanged ||
+            property == Person::StateChange::SurnameChanged) {
             // response to changed name
         }
     }
@@ -23,7 +24,7 @@ public:
 
     void update(const Person&, Person::StateChange property) const override
     {
-        if (property == Person::AddressChanged) {
+        if (property == Person::StateChange::AddressChanged) {
             // respond to changed address
         }
     }

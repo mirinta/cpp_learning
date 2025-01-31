@@ -6,5 +6,5 @@ class Observer
 public:
     virtual ~Observer() = default;
 
-    virtual void update(const Subject& subject, StateTag propergy) const = 0;
+    virtual void update(const Subject& subject, StateTag property) const = 0;
 };
