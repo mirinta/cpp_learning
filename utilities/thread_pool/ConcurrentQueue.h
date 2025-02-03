@@ -36,8 +36,7 @@ public:
 
     void stop()
     {
-        std::lock_guard<std::mutex> lockHead(_headMutex);
-        std::lock_guard<std::mutex> lockTail(_tailMutex);
+        std::scoped_lock lock(_headMutex, _tailMutex);
         _stop = true;
         _cv.notify_all();
     }

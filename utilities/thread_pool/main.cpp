@@ -13,9 +13,11 @@ int main()
 {
     spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [thread %t] [%l] %v");
     static constexpr size_t kNumOfTasks = 10;
+    static constexpr size_t kNumOfThreads = 4;
     std::vector<std::future<int>> results;
     results.reserve(kNumOfTasks);
-    ThreadPool pool(4);
+    spdlog::info("Construct a ThreadPool with {} threads.", kNumOfThreads);
+    ThreadPool pool(kNumOfThreads);
     for (size_t i = 0; i < kNumOfTasks; ++i) {
         results.emplace_back(pool.push(task, i + 1));
     }
