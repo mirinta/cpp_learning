@@ -29,6 +29,10 @@ Coro f() {
 - [Cppcon 2022: C++20's Coroutines for Beginners](https://www.youtube.com/watch?v=8sEe-4tig_A&t=1154s)
 
 - [CppNow 2023: Introduction to C++ Coroutines Through a Thread Scheduling Demonstration](https://www.youtube.com/watch?v=kIPzED3VD3w)
+  
+- [CppCon 2024: C++ Coroutines and Structured Concurrency in Practice](https://www.youtube.com/watch?v=aPqMQ7SXSiw)
+
+- [CpponSea 2022: Understanding C++ Coroutines by Example, Part 1](https://www.youtube.com/watch?v=tj0URCY_A1s)
 
 ## Libraries
 
