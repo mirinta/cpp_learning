@@ -7,19 +7,13 @@
  * the array. For any other type, value is 0.
  */
 template <typename T>
-struct rank : public integral_constant<size_t, 0>
-{
-};
+struct rank : public integral_constant<size_t, 0> {};
 
 template <typename T>
-struct rank<T[]> : public integral_constant<size_t, 1 + rank<T>::value>
-{
-};
+struct rank<T[]> : public integral_constant<size_t, 1 + rank<T>::value> {};
 
 template <typename T, size_t N>
-struct rank<T[N]> : public integral_constant<size_t, 1 + rank<T>::value>
-{
-};
+struct rank<T[N]> : public integral_constant<size_t, 1 + rank<T>::value> {};
 
 // the _v helper
 template <typename T>

@@ -7,14 +7,21 @@ auto _ = []() {
     return true;
 }();
 
-struct Coro
-{
-    struct promise_type
-    {
-        std::suspend_always initial_suspend() noexcept { return {}; }
-        std::suspend_always final_suspend() noexcept { return {}; }
+struct Coro {
+    struct promise_type {
+        std::suspend_always initial_suspend() noexcept
+        {
+            return {};
+        }
+        std::suspend_always final_suspend() noexcept
+        {
+            return {};
+        }
 
-        Coro get_return_type() { return std::coroutine_handle<promise_type>::from_promise(*this); }
+        Coro get_return_type()
+        {
+            return std::coroutine_handle<promise_type>::from_promise(*this);
+        }
         void return_void() {}
         void unhandled_exception() {}
     };
@@ -24,4 +31,7 @@ struct Coro
     std::coroutine_handle<promise_type> handle;
 };
 
-int main() { return 0; }
+int main()
+{
+    return 0;
+}

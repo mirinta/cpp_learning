@@ -3,14 +3,10 @@
 #include "trait_bool_constant.h"
 
 template <typename T1, typename T2>
-struct is_same : public false_type
-{
-};
+struct is_same : public false_type {};
 
 template <typename T>
-struct is_same<T, T> : public true_type
-{
-};
+struct is_same<T, T> : public true_type {};
 
 // the _v helper
 template <typename T1, typename T2>

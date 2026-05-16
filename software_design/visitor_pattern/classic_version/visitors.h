@@ -4,8 +4,7 @@
 
 class Circle;
 class Square;
-class ShapeVisitor
-{
+class ShapeVisitor {
 public:
     virtual ~ShapeVisitor() = default;
 
@@ -13,16 +12,26 @@ public:
     virtual void visit(const Square&) const = 0;
 };
 
-class ShapeRender : public ShapeVisitor
-{
+class ShapeRender : public ShapeVisitor {
 public:
-    void visit(const Circle&) const override { std::cout << "Render Circle" << '\n'; }
-    void visit(const Square&) const override { std::cout << "Render Square" << '\n'; }
+    void visit(const Circle&) const override
+    {
+        std::cout << "Render Circle" << '\n';
+    }
+    void visit(const Square&) const override
+    {
+        std::cout << "Render Square" << '\n';
+    }
 };
 
-class ShapeSerializer : public ShapeVisitor
-{
+class ShapeSerializer : public ShapeVisitor {
 public:
-    void visit(const Circle&) const override { std::cout << "Serialize Circle" << '\n'; }
-    void visit(const Square&) const override { std::cout << "Serialize Square" << '\n'; }
+    void visit(const Circle&) const override
+    {
+        std::cout << "Serialize Circle" << '\n';
+    }
+    void visit(const Square&) const override
+    {
+        std::cout << "Serialize Square" << '\n';
+    }
 };

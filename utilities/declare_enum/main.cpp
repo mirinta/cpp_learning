@@ -10,8 +10,7 @@ static_assert(EnumKeyName(Type::C) == "C", "");
 static_assert(EnumCount<Type>() == 4, "");
 static_assert(EnumName<Type>() == "Type", "");
 
-struct Test
-{
+struct Test {
     DECLARE_ENUM(ERROR, NONE, ERROR1, ERROR2)
     DECLARE_ENUM(STATUS, READY, RUNNING)
 };

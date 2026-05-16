@@ -30,33 +30,26 @@ struct type_list;
 
 namespace detail {
 template <typename T>
-struct is_type_list : public std::false_type
-{
-};
+struct is_type_list : public std::false_type {};
 
 template <typename... Ts>
-struct is_type_list<type_list<Ts...>> : public std::true_type
-{
-};
+struct is_type_list<type_list<Ts...>> : public std::true_type {};
 
 template <typename T>
 inline constexpr auto is_type_list_v = is_type_list<T>::value;
 
 template <typename... Ls>
-struct merge
-{
+struct merge {
     using type = type_list<>;
 };
 
 template <typename... Ts>
-struct merge<type_list<Ts...>>
-{
+struct merge<type_list<Ts...>> {
     using type = type_list<Ts...>;
 };
 
 template <typename... Ts, typename... Us, typename... Ls>
-struct merge<type_list<Ts...>, type_list<Us...>, Ls...>
-{
+struct merge<type_list<Ts...>, type_list<Us...>, Ls...> {
     using type = typename merge<type_list<Ts..., Us...>, Ls...>::type;
 };
 
@@ -67,14 +60,12 @@ template <size_t I, typename... Ts>
 struct at;
 
 template <typename Head, typename... Tail>
-struct at<0, Head, Tail...>
-{
+struct at<0, Head, Tail...> {
     using type = Head;
 };
 
 template <size_t I, typename Head, typename... Tail>
-struct at<I, Head, Tail...>
-{
+struct at<I, Head, Tail...> {
     using type = typename at<I - 1, Tail...>::type;
 };
 
@@ -82,20 +73,13 @@ template <size_t I, typename... Ts>
 using at_t = typename at<I, Ts...>::type;
 
 template <typename T, size_t I, typename... Ts>
-struct index_of : public std::integral_constant<int64_t, -1>
-{
-};
+struct index_of : public std::integral_constant<int64_t, -1> {};
 
 template <typename T, size_t I, typename... Ts>
-struct index_of<T, I, T, Ts...> : public std::integral_constant<int64_t, I>
-{
-};
+struct index_of<T, I, T, Ts...> : public std::integral_constant<int64_t, I> {};
 
 template <typename T, size_t I, typename Head, typename... Tail>
-struct index_of<T, I, Head, Tail...>
-    : public std::integral_constant<int64_t, index_of<T, I + 1, Tail...>::value>
-{
-};
+struct index_of<T, I, Head, Tail...> : public std::integral_constant<int64_t, index_of<T, I + 1, Tail...>::value> {};
 
 template <typename T, size_t I, typename... Ts>
 inline constexpr auto index_of_v = index_of<T, I, Ts...>::value;
@@ -107,14 +91,12 @@ template <size_t I, typename... Ts>
 struct remove_at;
 
 template <size_t I, typename Head, typename... Tail>
-struct remove_at<I, Head, Tail...>
-{
+struct remove_at<I, Head, Tail...> {
     using type = merge_t<type_list<Head>, typename remove_at<I - 1, Tail...>::type>;
 };
 
 template <typename Head, typename... Tail>
-struct remove_at<0, Head, Tail...>
-{
+struct remove_at<0, Head, Tail...> {
     using type = type_list<Tail...>;
 };
 
@@ -125,14 +107,12 @@ template <size_t I, typename T, typename... Ts>
 struct replace_at;
 
 template <size_t I, typename T, typename Head, typename... Tail>
-struct replace_at<I, T, Head, Tail...>
-{
+struct replace_at<I, T, Head, Tail...> {
     using type = merge_t<type_list<Head>, typename replace_at<I - 1, T, Tail...>::type>;
 };
 
 template <typename T, typename Head, typename... Tail>
-struct replace_at<0, T, Head, Tail...>
-{
+struct replace_at<0, T, Head, Tail...> {
     using type = type_list<T, Tail...>;
 };
 
@@ -140,14 +120,12 @@ template <size_t I, typename T, typename... Ts>
 using replace_at_t = typename replace_at<I, T, Ts...>::type;
 
 template <typename... Ts>
-struct reverse
-{
+struct reverse {
     using type = type_list<>;
 };
 
 template <typename Head, typename... Tail>
-struct reverse<Head, Tail...>
-{
+struct reverse<Head, Tail...> {
     using type = merge_t<typename reverse<Tail...>::type, type_list<Head>>;
 };
 
@@ -158,14 +136,12 @@ template <typename L, typename... Ts>
 struct unique;
 
 template <typename... Ts>
-struct unique<type_list<Ts...>>
-{
+struct unique<type_list<Ts...>> {
     using type = type_list<Ts...>;
 };
 
 template <typename... Ts, typename Head, typename... Tail>
-struct unique<type_list<Ts...>, Head, Tail...>
-{
+struct unique<type_list<Ts...>, Head, Tail...> {
     using type = std::conditional_t<type_list<Ts...>::template contains<Head>,
                                     typename unique<type_list<Ts...>, Tail...>::type,
                                     typename unique<type_list<Ts..., Head>, Tail...>::type>;
@@ -175,9 +151,7 @@ template <typename L, typename... Ts>
 using unique_t = typename unique<L, Ts...>::type;
 
 template <template <typename> class Predicate, typename... Ts>
-struct any
-{
-};
+struct any {};
 
 template <template <typename> class Predicate, typename... Ts>
 inline constexpr auto any_v = any<Predicate, Ts...>::value;
@@ -190,8 +164,7 @@ template <typename L, size_t... Is>
 concept ValidIndex = TypeList<L> && sizeof...(Is) > 0 && ((Is < L::size) && ...);
 
 template <typename... Ts>
-struct type_list
-{
+struct type_list {
     static constexpr auto size = sizeof...(Ts);
 
     template <typename T>
@@ -204,13 +177,15 @@ struct type_list
     using merge = detail::merge_t<type_list, Ls...>;
 
     template <size_t I>
-    requires ValidIndex<type_list, I> using at = detail::at_t<I, Ts...>;
+        requires ValidIndex<type_list, I>
+    using at = detail::at_t<I, Ts...>;
 
     template <size_t... Is>
     using slice = type_list<type_list::at<Is>...>;
 
     template <size_t I>
-    requires ValidIndex<type_list, I> using removeAt = detail::remove_at_t<I, Ts...>;
+        requires ValidIndex<type_list, I>
+    using removeAt = detail::remove_at_t<I, Ts...>;
 
     template <typename T>
     static constexpr auto indexOf = detail::index_of_v<T, 0, Ts...>;
@@ -219,7 +194,8 @@ struct type_list
     static constexpr auto contains = detail::contains_v<T, Ts...>;
 
     template <size_t I, typename T>
-    requires ValidIndex<type_list, I> using replaceAt = detail::replace_at_t<I, T, Ts...>;
+        requires ValidIndex<type_list, I>
+    using replaceAt = detail::replace_at_t<I, T, Ts...>;
 
     template <size_t I1, size_t I2>
     using swapAt = typename replaceAt<I1, at<I2>>::template replaceAt<I2, at<I1>>;
@@ -288,12 +264,9 @@ static_assert(std::is_same_v<L1, L1::merge<L1, L0>::unique>);
 static_assert(std::is_same_v<L2, L2::merge<L2::reverse, L2>::unique>);
 
 template <typename T>
-struct same_as_predicate
-{
+struct same_as_predicate {
     template <typename U>
-    struct predicate : public std::is_same<T, U>
-    {
-    };
+    struct predicate : public std::is_same<T, U> {};
 };
 static_assert(L2::any<same_as_predicate<long>::predicate>);
 static_assert(not L2::any<same_as_predicate<int>::predicate>);

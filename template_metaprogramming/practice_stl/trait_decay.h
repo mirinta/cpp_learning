@@ -14,13 +14,13 @@
  * Otherwise, returns remove_cv<remove_reference<T>>::type.
  */
 template <typename T>
-struct decay
-{
+struct decay {
 private:
     using U = remove_reference_t<T>;
 
 public:
-    using type = conditional_t<is_array_v<U>, add_pointer_t<remove_extent_t<U>>,
+    using type = conditional_t<is_array_v<U>,
+                               add_pointer_t<remove_extent_t<U>>,
                                conditional_t<is_function_v<U>, add_pointer_t<U>, remove_cv_t<U>>>;
 };
 

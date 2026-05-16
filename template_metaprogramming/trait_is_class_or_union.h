@@ -6,14 +6,10 @@
  * @brief Check if T is class/struct or union.
  */
 template <typename T, typename = void>
-struct is_class_or_union : public std::false_type
-{
-};
+struct is_class_or_union : public std::false_type {};
 
 template <typename T>
-struct is_class_or_union<T, std::void_t<int T::*>> : public std::true_type
-{
-};
+struct is_class_or_union<T, std::void_t<int T::*>> : public std::true_type {};
 
 template <typename T>
 inline constexpr bool is_class_or_union_v = is_class_or_union<T>::value;
@@ -24,9 +20,7 @@ template <typename T>
 inline constexpr bool is_class_or_union_v = std::is_union_v<T> || std::is_class_v<T>;
 
 template <typename T>
-struct is_class_or_union : public std::bool_constant<is_class_or_union_v<T>>
-{
-};
+struct is_class_or_union : public std::bool_constant<is_class_or_union_v<T>> {};
 }; // namespace version2
 
 /// function overloading version

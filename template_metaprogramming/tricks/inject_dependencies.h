@@ -1,10 +1,8 @@
 #pragma once
-#include <functional>
 #include <concepts>
+#include <functional>
 
-struct Config
-{
-};
+struct Config {};
 
 namespace runtime_polymorphism {
 using ConfigLoader = std::function<Config(const std::string&)>;
@@ -19,8 +17,8 @@ inline void usage()
 
 namespace compiletime_polymorphism {
 template <typename T>
-concept ConfigLoader = std::invocable<T, const std::string&>&&
-    std::same_as<Config, std::invoke_result_t<T, const std::string&>>;
+concept ConfigLoader =
+    std::invocable<T, const std::string&> && std::same_as<Config, std::invoke_result_t<T, const std::string&>>;
 
 void interface(ConfigLoader auto&& loader);
 

@@ -3,8 +3,7 @@
 
 #include "calculator_commands.h"
 
-class Calculator
-{
+class Calculator {
 public:
     explicit Calculator() = default;
 
@@ -24,7 +23,10 @@ public:
         current = command->undo(current);
     }
 
-    int result() const { return current; }
+    int result() const
+    {
+        return current;
+    }
 
     void clear()
     {

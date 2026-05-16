@@ -3,19 +3,13 @@
 #include "trait_bool_constant.h"
 
 template <typename T>
-struct is_array : public false_type
-{
-};
+struct is_array : public false_type {};
 
 template <typename T>
-struct is_array<T[]> : public true_type
-{
-};
+struct is_array<T[]> : public true_type {};
 
 template <typename T, size_t N>
-struct is_array<T[N]> : public true_type
-{
-};
+struct is_array<T[N]> : public true_type {};
 
 // the _v helper
 template <typename T>

@@ -6,8 +6,7 @@
 
 namespace bits_of_q {
 template <typename... ELEMS>
-struct Tuple
-{
+struct Tuple {
     /// Constructor: empty tuple, no "data" member
     constexpr Tuple() = default;
 };
@@ -15,8 +14,7 @@ struct Tuple
 /// Recursive inheritance
 /// Example: Tuple<E0, E1, E2> {E0 data;} -> Tuple<E1, E2> {E1 data;} -> Tuple<E2> {E2 data;}
 template <typename E0, typename... E1toN>
-struct Tuple<E0, E1toN...> : public Tuple<E1toN...>
-{
+struct Tuple<E0, E1toN...> : public Tuple<E1toN...> {
     /// Constructor: multiple types, only owns the data of the first type (E0)
     /// ********** IMPORTANT **********
     /// 1. Without forwarding reference, if the data type is Ei,
@@ -56,9 +54,7 @@ template <typename TUPLE>
 struct tuple_size;
 
 template <typename... ELEMS>
-struct tuple_size<Tuple<ELEMS...>> : std::integral_constant<size_t, sizeof...(ELEMS)>
-{
-};
+struct tuple_size<Tuple<ELEMS...>> : std::integral_constant<size_t, sizeof...(ELEMS)> {};
 
 template <typename TUPLE>
 inline constexpr auto tuple_size_v = tuple_size<TUPLE>::value;
@@ -69,13 +65,10 @@ inline constexpr auto tuple_size_v = tuple_size<TUPLE>::value;
 
 namespace detail {
 template <size_t I, typename TUPLE>
-struct get_impl : public get_impl<I - 1, pop_front_t<TUPLE>>
-{
-};
+struct get_impl : public get_impl<I - 1, pop_front_t<TUPLE>> {};
 
 template <typename TUPLE>
-struct get_impl<0, TUPLE>
-{
+struct get_impl<0, TUPLE> {
     /// After the type list is manipulated to the expected form,
     /// We need to extract the data from it
     /// TODO: remove_ref before using is_const?
@@ -146,14 +139,10 @@ struct tuple_cat_result;
 
 template <template <typename...> class TUPLE, typename... T1s, typename... T2s, typename... TUPLES>
 struct tuple_cat_result<TUPLE<T1s...>, TUPLE<T2s...>, TUPLES...>
-    : public tuple_cat_result<TUPLE<T1s..., T2s...>, TUPLES...>
-{
-};
+    : public tuple_cat_result<TUPLE<T1s..., T2s...>, TUPLES...> {};
 
 template <typename TUPLE>
-struct tuple_cat_result<TUPLE> : public std::type_identity<TUPLE>
-{
-};
+struct tuple_cat_result<TUPLE> : public std::type_identity<TUPLE> {};
 
 template <typename... TUPLES>
 using tuple_cat_result_t = typename tuple_cat_result<TUPLES...>::type;
@@ -162,8 +151,7 @@ template <typename RESULT_TUPLE, typename INDEX_SEQ>
 struct make_tuple_from_forward_tuple;
 
 template <typename RESULT_TUPLE, size_t... Is>
-struct make_tuple_from_forward_tuple<RESULT_TUPLE, std::index_sequence<Is...>>
-{
+struct make_tuple_from_forward_tuple<RESULT_TUPLE, std::index_sequence<Is...>> {
     template <typename FWD_TUPLE>
     static constexpr auto f(FWD_TUPLE&& fwd)
     {
@@ -175,8 +163,7 @@ template <typename FWD_INDEX_SEQ, typename TUPLE_INDEX_SEQ>
 struct concat_with_forward_tuple;
 
 template <size_t... FWD_Is, size_t... TUPLE_Is>
-struct concat_with_forward_tuple<std::index_sequence<FWD_Is...>, std::index_sequence<TUPLE_Is...>>
-{
+struct concat_with_forward_tuple<std::index_sequence<FWD_Is...>, std::index_sequence<TUPLE_Is...>> {
     template <typename FWD_TUPLE, typename TUPLE>
     static constexpr auto f(FWD_TUPLE&& fwd, TUPLE&& tuple)
     {
@@ -186,8 +173,7 @@ struct concat_with_forward_tuple<std::index_sequence<FWD_Is...>, std::index_sequ
 };
 
 template <typename RESULT_TUPLE>
-struct tuple_cat_impl
-{
+struct tuple_cat_impl {
     /// version 1: concate only two tuples using two corresponding index sequences
     /// e.g., t1 has N elements, t2 has M elements, then
     /// the result is Tuple(get<0>(t1),...,get<N-1>(t1),get<0>(t2),...,get<M-1>(t2))
@@ -240,9 +226,8 @@ struct tuple_cat_impl
     template <typename FWD_TUPLE, typename TUPLE, typename... TUPLES>
     static constexpr auto f(FWD_TUPLE&& fwd, TUPLE&& t, TUPLES&&... tuples)
     {
-        return f(concat_with_forward_tuple<
-                     std::make_index_sequence<tuple_size_v<std::remove_cvref_t<FWD_TUPLE>>>,
-                     std::make_index_sequence<tuple_size_v<std::remove_cvref_t<TUPLE>>>>::
+        return f(concat_with_forward_tuple<std::make_index_sequence<tuple_size_v<std::remove_cvref_t<FWD_TUPLE>>>,
+                                           std::make_index_sequence<tuple_size_v<std::remove_cvref_t<TUPLE>>>>::
                      f(std::forward<FWD_TUPLE>(fwd), std::forward<TUPLE>(t)),
                  std::forward<TUPLES>(tuples)...);
     }
@@ -252,8 +237,8 @@ struct tuple_cat_impl
     static constexpr auto f(FWD_TUPLE&& fwd)
     {
         return make_tuple_from_forward_tuple<
-            RESULT_TUPLE, std::make_index_sequence<tuple_size_v<std::remove_cvref_t<FWD_TUPLE>>>>::
-            f(std::forward<FWD_TUPLE>(fwd));
+            RESULT_TUPLE,
+            std::make_index_sequence<tuple_size_v<std::remove_cvref_t<FWD_TUPLE>>>>::f(std::forward<FWD_TUPLE>(fwd));
     }
 };
 } // namespace detail
@@ -284,9 +269,8 @@ constexpr auto transform_impl(TUPLE&& tuple, const FUNC& f, std::index_sequence<
 template <typename TUPLE, typename FUNC>
 constexpr auto transform(TUPLE&& tuple, const FUNC& f)
 {
-    return detail::transform_impl(
-        std::forward<TUPLE>(tuple), f,
-        std::make_index_sequence<tuple_size_v<std::remove_cvref_t<TUPLE>>>{});
+    return detail::transform_impl(std::forward<TUPLE>(tuple), f,
+                                  std::make_index_sequence<tuple_size_v<std::remove_cvref_t<TUPLE>>>{});
 }
 
 ////////////////////////////////////////////////////////////
@@ -304,13 +288,10 @@ namespace detail {
 template <typename TUPLE, template <typename> class PREDICATE>
 struct filter_result;
 
-template <template <typename...> class TUPLE, typename... ELEMS,
-          template <typename> class PREDICATE>
-struct filter_result<TUPLE<ELEMS...>, PREDICATE>
-{
+template <template <typename...> class TUPLE, typename... ELEMS, template <typename> class PREDICATE>
+struct filter_result<TUPLE<ELEMS...>, PREDICATE> {
     template <typename ELEM>
-    struct wrap_if_pred_matches
-    {
+    struct wrap_if_pred_matches {
         using type = std::conditional_t<PREDICATE<ELEM>::value, TUPLE<ELEM>, TUPLE<>>;
     };
     using type = tuple_cat_result_t<typename wrap_if_pred_matches<ELEMS>::type...>;
@@ -374,11 +355,8 @@ constexpr auto filter(TUPLE&& tuple)
     //    auto wrapped_tuple = transform(std::forward<TUPLE>(tuple), wrap_if_pred_matches);
     /// version 2:
     auto wrapped_tuple = detail::wrap_filtered<PREDICATE>(
-        std::forward<TUPLE>(tuple),
-        std::make_index_sequence<tuple_size_v<std::remove_cvref_t<TUPLE>>>{});
-    return detail::cat_tuple_content_as<
-        detail::filter_result_t<std::remove_cvref_t<TUPLE>, PREDICATE>>(
-        std::move(wrapped_tuple),
-        std::make_index_sequence<tuple_size_v<std::remove_cvref_t<TUPLE>>>{});
+        std::forward<TUPLE>(tuple), std::make_index_sequence<tuple_size_v<std::remove_cvref_t<TUPLE>>>{});
+    return detail::cat_tuple_content_as<detail::filter_result_t<std::remove_cvref_t<TUPLE>, PREDICATE>>(
+        std::move(wrapped_tuple), std::make_index_sequence<tuple_size_v<std::remove_cvref_t<TUPLE>>>{});
 }
 } // namespace bits_of_q

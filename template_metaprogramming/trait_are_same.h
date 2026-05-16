@@ -10,14 +10,10 @@
  * 3. std::conjunction<>::value = true.
  */
 template <typename... Ts>
-struct are_same : public std::false_type
-{
-};
+struct are_same : public std::false_type {};
 
 template <typename T, typename... Ts>
-struct are_same<T, Ts...> : public std::conjunction<std::is_same<T, Ts>...>
-{
-};
+struct are_same<T, Ts...> : public std::conjunction<std::is_same<T, Ts>...> {};
 
 template <typename... Ts>
 inline constexpr bool are_same_v = are_same<Ts...>::value;

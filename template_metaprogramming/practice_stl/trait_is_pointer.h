@@ -7,29 +7,19 @@
  * @note Pointers may have top-level cv-qualifiers.
  */
 template <typename T>
-struct is_pointer : public false_type
-{
-};
+struct is_pointer : public false_type {};
 
 template <typename T>
-struct is_pointer<T*> : public true_type
-{
-};
+struct is_pointer<T*> : public true_type {};
 
 template <typename T>
-struct is_pointer<T* const> : public true_type
-{
-};
+struct is_pointer<T* const> : public true_type {};
 
 template <typename T>
-struct is_pointer<T* volatile> : public true_type
-{
-};
+struct is_pointer<T* volatile> : public true_type {};
 
 template <typename T>
-struct is_pointer<T* const volatile> : public true_type
-{
-};
+struct is_pointer<T* const volatile> : public true_type {};
 
 // the _v helper
 template <typename T>

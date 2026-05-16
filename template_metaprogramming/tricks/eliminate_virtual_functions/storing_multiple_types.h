@@ -5,20 +5,15 @@
 #include <vector>
 
 template <typename T>
-concept IsInterface = requires(T t)
-{
-    {
-        t.func()
-    }
-    ->std::same_as<int>;
+concept IsInterface = requires(T t) {
+    { t.func() } -> std::same_as<int>;
 };
 
 template <typename T, typename... Ts>
 concept SameAsAny = (... or std::same_as<T, Ts>);
 
 template <IsInterface... Ts>
-struct MultiTypesWrapper
-{
+struct MultiTypesWrapper {
 public:
     template <SameAsAny<Ts...> T>
     void add(T&& t)
@@ -32,12 +27,10 @@ private:
 
 inline void usage()
 {
-    struct T1
-    {
+    struct T1 {
         int func();
     };
-    struct T2
-    {
+    struct T2 {
         int func();
     };
 

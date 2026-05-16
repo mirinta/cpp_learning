@@ -1,30 +1,22 @@
 #pragma once
 
-#include "trait_type_identity.h"
 #include "trait_is_same.h"
+#include "trait_type_identity.h"
 
 /**
  * @brief Remove the top-level cv-qualifiers of T.
  */
 template <typename T>
-struct remove_cv : type_identity<T>
-{
-};
+struct remove_cv : type_identity<T> {};
 
 template <typename T>
-struct remove_cv<const T> : type_identity<T>
-{
-};
+struct remove_cv<const T> : type_identity<T> {};
 
 template <typename T>
-struct remove_cv<volatile T> : type_identity<T>
-{
-};
+struct remove_cv<volatile T> : type_identity<T> {};
 
 template <typename T>
-struct remove_cv<const volatile T> : type_identity<T>
-{
-};
+struct remove_cv<const volatile T> : type_identity<T> {};
 
 // the _t helper
 template <typename T>

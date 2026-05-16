@@ -14,34 +14,31 @@
  * 4. The operator+ is noexcept and the return type is the same as the first arg type.
  */
 template <typename... Args>
-concept Addable = requires(Args... args)
-{
+concept Addable = requires(Args... args) {
     requires arguments_count_v<Args...> > 1;
     requires are_same_v<Args...>;
     (... + args);
-    {
-        (... + args)
-    }
-    noexcept->std::same_as<first_type_t<Args...>>;
+    { (... + args) } noexcept -> std::same_as<first_type_t<Args...>>;
 };
 
 template <typename... Args>
-requires Addable<Args...> auto add(Args&&... args)
+    requires Addable<Args...>
+auto add(Args&&... args)
 {
     return (... + args);
 }
 
 namespace test_Addable {
 template <bool withNoExcept, bool hasOperatorPlus, bool validReturnType>
-struct Test
-{
-    Test operator+(const Test&) noexcept(withNoExcept) requires(hasOperatorPlus&& validReturnType)
+struct Test {
+    Test operator+(const Test&) noexcept(withNoExcept)
+        requires(hasOperatorPlus && validReturnType)
     {
         return *this;
     }
 
-    int operator+(const Test&) noexcept(not withNoExcept) requires(hasOperatorPlus &&
-                                                                   not validReturnType)
+    int operator+(const Test&) noexcept(not withNoExcept)
+        requires(hasOperatorPlus && not validReturnType)
     {
         return 0;
     }

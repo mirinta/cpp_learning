@@ -2,8 +2,7 @@
 
 #include <iostream>
 
-struct Counter
-{
+struct Counter {
     int default_constructs = 0;
     int copy_constructs = 0;
     int copy_assignments = 0;
@@ -21,8 +20,7 @@ inline std::ostream& operator<<(std::ostream& os, const Counter& counter)
     return os;
 }
 
-struct TestClass
-{
+struct TestClass {
     inline static Counter counter;
     static Counter reset()
     {
@@ -32,14 +30,23 @@ struct TestClass
         return old;
     };
 
-    TestClass() { counter.default_constructs++; };
-    TestClass(const TestClass&) { counter.copy_constructs++; }
+    TestClass()
+    {
+        counter.default_constructs++;
+    };
+    TestClass(const TestClass&)
+    {
+        counter.copy_constructs++;
+    }
     TestClass& operator=(const TestClass&)
     {
         counter.copy_assignments++;
         return *this;
     }
-    TestClass(TestClass&&) noexcept { counter.move_constructs++; }
+    TestClass(TestClass&&) noexcept
+    {
+        counter.move_constructs++;
+    }
     TestClass& operator=(TestClass&&) noexcept
     {
         counter.move_assignments++;

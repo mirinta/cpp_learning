@@ -38,8 +38,7 @@
 
 namespace bits_of_q {
 
-struct CopyStats
-{
+struct CopyStats {
     int n_default_constructs = 0;
     int n_copies = 0;
     int n_moves = 0;
@@ -53,24 +52,33 @@ inline std::ostream& operator<<(std::ostream& os, const CopyStats& stats)
     return os;
 }
 template <size_t i>
-struct IndexedCopyCounter
-{
-    struct reset_after_construct_t
-    {
-    };
+struct IndexedCopyCounter {
+    struct reset_after_construct_t {};
     static constexpr reset_after_construct_t reset_after_construct{};
 
     inline static CopyStats stats;
 
-    explicit IndexedCopyCounter(reset_after_construct_t) { reset(); }
-    IndexedCopyCounter() { stats.n_default_constructs++; }
-    IndexedCopyCounter(const IndexedCopyCounter&) { stats.n_copies++; }
+    explicit IndexedCopyCounter(reset_after_construct_t)
+    {
+        reset();
+    }
+    IndexedCopyCounter()
+    {
+        stats.n_default_constructs++;
+    }
+    IndexedCopyCounter(const IndexedCopyCounter&)
+    {
+        stats.n_copies++;
+    }
     IndexedCopyCounter& operator=(const IndexedCopyCounter&)
     {
         stats.n_copies++;
         return *this;
     }
-    IndexedCopyCounter(IndexedCopyCounter&&) noexcept { stats.n_moves++; };
+    IndexedCopyCounter(IndexedCopyCounter&&) noexcept
+    {
+        stats.n_moves++;
+    };
     IndexedCopyCounter& operator=(IndexedCopyCounter&&) noexcept
     {
         stats.n_moves++;
@@ -93,14 +101,13 @@ struct IndexedCopyCounter
 template <size_t i>
 inline std::ostream& operator<<(std::ostream& os, const IndexedCopyCounter<i>& c)
 {
-    os << "{ default_constructs: " << c.stats.n_default_constructs
-       << ", copies: " << c.stats.n_copies << ", moves: " << c.stats.n_moves << " }";
+    os << "{ default_constructs: " << c.stats.n_default_constructs << ", copies: " << c.stats.n_copies
+       << ", moves: " << c.stats.n_moves << " }";
     return os;
 }
 namespace detail {
-static constexpr size_t default_copycounter_index =
-    2734987; // just some random number so you don't easily create an
-             // IndexedCopyCounter with the same index
+static constexpr size_t default_copycounter_index = 2734987; // just some random number so you don't easily create an
+                                                             // IndexedCopyCounter with the same index
 } // namespace detail
 using CopyCounter = IndexedCopyCounter<detail::default_copycounter_index>;
 
@@ -117,11 +124,9 @@ IndexedCopyCounter<index> make_copy_counter()
 /// as GoogleTest or Catch.
 namespace bits_of_q::testing {
 
-struct AssertFailed : std::runtime_error
-{
+struct AssertFailed : std::runtime_error {
     explicit AssertFailed(std::string_view file_path, size_t line, std::string assert_expression)
-        : std::runtime_error("assert failed"), file(file_path), line_nr(line),
-          expression(std::move(assert_expression))
+        : std::runtime_error("assert failed"), file(file_path), line_nr(line), expression(std::move(assert_expression))
     {
     }
     std::string_view file;
@@ -129,36 +134,37 @@ struct AssertFailed : std::runtime_error
     std::string expression;
 };
 
-struct AssertEqFailed : public AssertFailed
-{
-    explicit AssertEqFailed(std::string_view file_path, size_t line, std::string assert_expression,
-                            std::string value_string1, std::string value_string2)
+struct AssertEqFailed : public AssertFailed {
+    explicit AssertEqFailed(std::string_view file_path,
+                            size_t line,
+                            std::string assert_expression,
+                            std::string value_string1,
+                            std::string value_string2)
         : AssertFailed(file_path, line, std::move(assert_expression)),
-          value1(std::move(value_string1)), value2(std::move(value_string2))
+          value1(std::move(value_string1)),
+          value2(std::move(value_string2))
     {
     }
     std::string value1;
     std::string value2;
 };
 
-#define ASSERT(expr)                                                                    \
-    if (!(expr)) {                                                                      \
-        throw ::bits_of_q::testing::AssertFailed{__FILE__, __LINE__,                    \
-                                                 std::string{"ASSERT("} + #expr + ")"}; \
+#define ASSERT(expr)                                                                                        \
+    if (!(expr)) {                                                                                          \
+        throw ::bits_of_q::testing::AssertFailed{__FILE__, __LINE__, std::string{"ASSERT("} + #expr + ")"}; \
     }
 
 // Making the assumption here than the expressions can be converted to string. A more robust
 // solution would verify if this is the case using for example a requires expression instead of
 // risking compilation errors when dealing with expressions that can't be converted to string
-#define ASSERT_EQ(expr1, expr2)                                                           \
-    if (!((expr1) == (expr2))) {                                                          \
-        std::stringstream ss1;                                                            \
-        std::stringstream ss2;                                                            \
-        ss1 << (expr1);                                                                   \
-        ss2 << (expr2);                                                                   \
-        throw ::bits_of_q::testing::AssertEqFailed{                                       \
-            __FILE__, __LINE__, std::string{"ASSERT_EQ("} + #expr1 + ", " + #expr2 + ")", \
-            ss1.str(), ss2.str()};                                                        \
+#define ASSERT_EQ(expr1, expr2)                                                                                  \
+    if (!((expr1) == (expr2))) {                                                                                 \
+        std::stringstream ss1;                                                                                   \
+        std::stringstream ss2;                                                                                   \
+        ss1 << (expr1);                                                                                          \
+        ss2 << (expr2);                                                                                          \
+        throw ::bits_of_q::testing::AssertEqFailed{                                                              \
+            __FILE__, __LINE__, std::string{"ASSERT_EQ("} + #expr1 + ", " + #expr2 + ")", ss1.str(), ss2.str()}; \
     }
 
 inline void output_specific_assert_info(const AssertFailed&) {}
@@ -188,8 +194,7 @@ static void output_exception_info()
     }
 }
 
-class Tester
-{
+class Tester {
     /// Unix terminal color codes
     /// Use fmt::format's color manipulation or if your compiler already supports it std::format for
     /// an easy cross-platform alternative.
@@ -230,8 +235,7 @@ private:
 };
 
 enum class Configuration { non_const_lvalue = 0, const_lvalue, non_const_rvalue, const_rvalue };
-static constexpr std::array<std::string_view, 4> g_config_string = {"&", "const &", "&&",
-                                                                    "const &&"};
+static constexpr std::array<std::string_view, 4> g_config_string = {"&", "const &", "&&", "const &&"};
 constexpr std::string_view config_to_string(Configuration c)
 {
     return g_config_string[static_cast<size_t>(c)];
@@ -240,8 +244,7 @@ template <Configuration... configs>
 class Builder;
 
 template <size_t n_args>
-class TesterWithBuilder
-{
+class TesterWithBuilder {
 public:
     /// Executes functions with a builder for different configurations(see above) as input.
     /// Example:
@@ -267,15 +270,13 @@ public:
                     execute_for_config<i.value>(std::make_index_sequence<n_args>{}, function);
                 } catch (...) {
                     output_exception_info();
-                    std::cerr << "Using builder config: "
-                              << get_config_str<i.value>(std::make_index_sequence<n_args>{})
+                    std::cerr << "Using builder config: " << get_config_str<i.value>(std::make_index_sequence<n_args>{})
                               << "\n";
                     failed_configs++;
                 }
             });
             if (failed_configs > 0) {
-                throw std::runtime_error("Test failed for " + std::to_string(failed_configs) +
-                                         " configurations");
+                throw std::runtime_error("Test failed for " + std::to_string(failed_configs) + " configurations");
             };
         };
         Tester::test(test_name, std::move(test_func));
@@ -285,8 +286,7 @@ private:
     template <typename T>
     static constexpr T constexpr_pow(T num, unsigned int pow)
     {
-        return (pow >= sizeof(unsigned int) * 8) ? 0
-                                                 : pow == 0 ? 1 : num * constexpr_pow(num, pow - 1);
+        return (pow >= sizeof(unsigned int) * 8) ? 0 : pow == 0 ? 1 : num * constexpr_pow(num, pow - 1);
     }
 
     template <size_t config, size_t... arg_indices, typename FUNC>
@@ -300,33 +300,30 @@ private:
     {
         constexpr size_t n_configurations_per_arg = 4;
         constexpr auto arg_config = static_cast<Configuration>(
-            size_t(config / constexpr_pow(n_configurations_per_arg, arg_index)) %
-            n_configurations_per_arg);
+            size_t(config / constexpr_pow(n_configurations_per_arg, arg_index)) % n_configurations_per_arg);
         return arg_config;
     }
 
     template <size_t config, size_t... arg_indices>
     static std::string get_config_str(std::index_sequence<arg_indices...>)
     {
-        return "| " +
-               ((std::string{config_to_string(compute_arg_config<config, arg_indices>())} + " | ") +
-                ...);
+        return "| " + ((std::string{config_to_string(compute_arg_config<config, arg_indices>())} + " | ") + ...);
     }
 };
 
 template <Configuration... configs>
-class Builder
-{
+class Builder {
 public:
     template <typename ARG>
-    requires(sizeof...(configs) == 1) decltype(auto) build(ARG&& arg)
+        requires(sizeof...(configs) == 1)
+    decltype(auto) build(ARG&& arg)
     {
         return store_and_cast<configs...>(std::forward<ARG>(arg));
     }
 
     template <typename... ARGS>
-    requires(sizeof...(configs) > 1 && sizeof...(configs) == sizeof...(ARGS)) decltype(auto)
-        build(ARGS&&... args)
+        requires(sizeof...(configs) > 1 && sizeof...(configs) == sizeof...(ARGS))
+    decltype(auto) build(ARGS&&... args)
     {
         return std::tuple<decltype(store_and_cast<configs>(std::forward<ARGS>(args)))...>{
             store_and_cast<configs>(std::forward<ARGS>(args))...};
@@ -339,9 +336,7 @@ private:
     decltype(auto) store_and_cast(T&& t)
     {
         auto* copy = new std::remove_cvref_t<T>{std::forward<T>(t)};
-        void (*destructor)(void*) = [](void* ptr) {
-            delete static_cast<std::remove_cvref_t<T>*>(ptr);
-        };
+        void (*destructor)(void*) = [](void* ptr) { delete static_cast<std::remove_cvref_t<T>*>(ptr); };
         m_values.emplace_back(copy, destructor);
         return cast_value<config>(*copy);
     }

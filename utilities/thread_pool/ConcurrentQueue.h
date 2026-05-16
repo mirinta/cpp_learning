@@ -5,8 +5,7 @@
 #include <mutex>
 
 template <typename T>
-class ConcurrentQueue
-{
+class ConcurrentQueue {
 public:
     explicit ConcurrentQueue() : _head(std::make_unique<Node>()), _tail(_head.get()) {}
 
@@ -42,8 +41,7 @@ public:
     }
 
 private:
-    struct Node
-    {
+    struct Node {
         T value;
         std::unique_ptr<Node> next;
         explicit Node() = default;

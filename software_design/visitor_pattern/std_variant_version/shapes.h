@@ -2,14 +2,12 @@
 
 #include <variant>
 
-class Circle
-{
+class Circle {
 public:
     explicit Circle(double) {};
 };
 
-class Square
-{
+class Square {
 public:
     explicit Square(double) {};
 };

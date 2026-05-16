@@ -9,19 +9,13 @@
  * - int[][3] -> int[3]
  */
 template <typename T>
-struct remove_extent : public type_identity<T>
-{
-};
+struct remove_extent : public type_identity<T> {};
 
 template <typename T>
-struct remove_extent<T[]> : public type_identity<T>
-{
-};
+struct remove_extent<T[]> : public type_identity<T> {};
 
 template <typename T, size_t N>
-struct remove_extent<T[N]> : public type_identity<T>
-{
-};
+struct remove_extent<T[N]> : public type_identity<T> {};
 
 // the _t helper
 template <typename T>

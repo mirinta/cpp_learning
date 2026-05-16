@@ -7,9 +7,7 @@
  * @note An empty list is not allowed.
  */
 template <typename T, typename...>
-struct first_type : public std::type_identity<T>
-{
-};
+struct first_type : public std::type_identity<T> {};
 
 template <typename... Ts>
 using first_type_t = typename first_type<Ts...>::type;

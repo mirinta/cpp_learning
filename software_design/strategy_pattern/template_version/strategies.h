@@ -6,33 +6,40 @@ class Circle;
 class Square;
 
 template <typename T>
-class DrawStrategy
-{
+class DrawStrategy {
 public:
     virtual ~DrawStrategy() = default;
     virtual void draw(const T&) const = 0;
 };
 
-class OpenGLCircleStrategy : public DrawStrategy<Circle>
-{
+class OpenGLCircleStrategy : public DrawStrategy<Circle> {
 public:
-    void draw(const Circle&) const override { std::cout << "Draw Circle using OpenGL" << '\n'; }
+    void draw(const Circle&) const override
+    {
+        std::cout << "Draw Circle using OpenGL" << '\n';
+    }
 };
 
-class MetalCircleStrategy : public DrawStrategy<Circle>
-{
+class MetalCircleStrategy : public DrawStrategy<Circle> {
 public:
-    void draw(const Circle&) const override { std::cout << "Draw Circle using Metal" << '\n'; }
+    void draw(const Circle&) const override
+    {
+        std::cout << "Draw Circle using Metal" << '\n';
+    }
 };
 
-class OpenGLSquareStrategy : public DrawStrategy<Square>
-{
+class OpenGLSquareStrategy : public DrawStrategy<Square> {
 public:
-    void draw(const Square&) const override { std::cout << "Draw Square using OpenGL" << '\n'; }
+    void draw(const Square&) const override
+    {
+        std::cout << "Draw Square using OpenGL" << '\n';
+    }
 };
 
-class MetalSquareStrategy : public DrawStrategy<Square>
-{
+class MetalSquareStrategy : public DrawStrategy<Square> {
 public:
-    void draw(const Square&) const override { std::cout << "Draw Square using Metal" << '\n'; }
+    void draw(const Square&) const override
+    {
+        std::cout << "Draw Square using Metal" << '\n';
+    }
 };

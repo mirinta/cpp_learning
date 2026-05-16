@@ -4,9 +4,7 @@
 #include "trait_remove_cv.h"
 
 template <typename T>
-struct is_void : public is_same<void, remove_cv_t<T>>
-{
-};
+struct is_void : public is_same<void, remove_cv_t<T>> {};
 
 // the _v helper
 template <typename T>

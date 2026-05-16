@@ -9,15 +9,11 @@
  * 2. std::conjunction<>::value = true.
  */
 template <typename... Ts>
-struct are_all_integral : public std::conjunction<std::is_integral<Ts>...>
-{
-};
+struct are_all_integral : public std::conjunction<std::is_integral<Ts>...> {};
 
 // partial specialization, the list is empty
 template <>
-struct are_all_integral<> : public std::false_type
-{
-};
+struct are_all_integral<> : public std::false_type {};
 
 template <typename... Ts>
 inline constexpr bool are_all_integral_v = are_all_integral<Ts...>::value;

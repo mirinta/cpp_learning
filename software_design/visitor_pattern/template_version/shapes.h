@@ -2,15 +2,13 @@
 
 #include "visitors.h"
 
-class Shape
-{
+class Shape {
 public:
     virtual ~Shape() = default;
     virtual void accept(const AbstractVisitor&) const = 0;
 };
 
-class Circle : public Shape
-{
+class Circle : public Shape {
 public:
     explicit Circle(double) {}
     void accept(const AbstractVisitor& v) const override
@@ -21,8 +19,7 @@ public:
     }
 };
 
-class Square : public Shape
-{
+class Square : public Shape {
 public:
     explicit Square(double) {}
     void accept(const AbstractVisitor& v) const override

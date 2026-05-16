@@ -7,19 +7,13 @@
  * Otherwise, the type is T.
  */
 template <typename T>
-struct remove_reference : public type_identity<T>
-{
-};
+struct remove_reference : public type_identity<T> {};
 
 template <typename T>
-struct remove_reference<T&> : public type_identity<T>
-{
-};
+struct remove_reference<T&> : public type_identity<T> {};
 
 template <typename T>
-struct remove_reference<T&&> : public type_identity<T>
-{
-};
+struct remove_reference<T&&> : public type_identity<T> {};
 
 // the _t helper
 template <typename T>

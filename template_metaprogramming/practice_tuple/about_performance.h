@@ -2,9 +2,7 @@
 namespace example {
 /// class template
 template <typename... Ts>
-struct list
-{
-};
+struct list {};
 
 /// alias
 template <typename... Ts>
@@ -53,14 +51,12 @@ void func(Ts...)
 ////////////////////////////////////////
 namespace slow_impl {
 template <bool CONDITION, typename THEN, typename ELSE>
-struct if_
-{
+struct if_ {
     using type = THEN;
 };
 
 template <typename THEN, typename ELSE>
-struct if_<false, THEN, ELSE>
-{
+struct if_<false, THEN, ELSE> {
     using type = ELSE;
 };
 
@@ -75,15 +71,13 @@ struct if_<false, THEN, ELSE>
 
 namespace faster_impl {
 template <bool CONDITION>
-struct if_
-{
+struct if_ {
     template <typename THEN, typename ELSE>
     using f = THEN;
 };
 
 template <>
-struct if_<false>
-{
+struct if_<false> {
     template <typename THEN, typename ELSE>
     using f = ELSE;
 };

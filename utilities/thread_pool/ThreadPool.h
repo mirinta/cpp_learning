@@ -8,8 +8,7 @@
 
 #include "ConcurrentQueue.h"
 
-class ThreadPool
-{
+class ThreadPool {
 public:
     explicit ThreadPool(size_t numOfThreads = std::thread::hardware_concurrency())
     {

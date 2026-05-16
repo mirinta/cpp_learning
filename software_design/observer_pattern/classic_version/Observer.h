@@ -1,8 +1,7 @@
 #pragma once
 
 template <typename Subject, typename StateTag>
-class Observer
-{
+class Observer {
 public:
     virtual ~Observer() = default;
 

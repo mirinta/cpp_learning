@@ -1,5 +1,5 @@
-#include "test_utils_v2.h"
 #include "Tuple.h"
+#include "test_utils_v2.h"
 
 constexpr size_t boq_tuple = 1;
 constexpr size_t std_tuple = 2;
@@ -51,10 +51,8 @@ int main()
         auto c1 = make_copy_counter<boq_tuple>();
         auto c2 = make_copy_counter<std_tuple>();
 
-        auto&& [boq_tuple1, boq_tuple2] =
-            builder.build(boq::Tuple{42, c1, true}, boq::Tuple{false, c1, 1.2});
-        auto&& [std_tuple1, std_tuple2] =
-            builder.build(std::tuple{42, c2, true}, std::tuple{false, c2, 1.2});
+        auto&& [boq_tuple1, boq_tuple2] = builder.build(boq::Tuple{42, c1, true}, boq::Tuple{false, c1, 1.2});
+        auto&& [std_tuple1, std_tuple2] = builder.build(std::tuple{42, c2, true}, std::tuple{false, c2, 1.2});
 
         auto boq_t1_2 = boq::tuple_cat(std::forward<decltype(boq_tuple1)>(boq_tuple1),
                                        std::forward<decltype(boq_tuple2)>(boq_tuple2));
@@ -70,19 +68,15 @@ int main()
         auto c2 = make_copy_counter<std_tuple>();
 
         // varying value category of first and last tuple by constructing them with the builder
-        auto&& [boq_tuple1, boq_tuple3] =
-            builder.build(boq::Tuple{42, c1, true}, boq::Tuple{7, 'c'});
+        auto&& [boq_tuple1, boq_tuple3] = builder.build(boq::Tuple{42, c1, true}, boq::Tuple{7, 'c'});
         boq::Tuple boq_tuple2{false, c1, 1.2};
-        auto&& [std_tuple1, std_tuple3] =
-            builder.build(std::tuple{42, c2, true}, std::tuple{7, 'c'});
+        auto&& [std_tuple1, std_tuple3] = builder.build(std::tuple{42, c2, true}, std::tuple{7, 'c'});
         std::tuple std_tuple2{false, c2, 1.2};
 
-        auto boq_t1_2_3 =
-            boq::tuple_cat(std::forward<decltype(boq_tuple1)>(boq_tuple1), std::move(boq_tuple2),
-                           std::forward<decltype(boq_tuple3)>(boq_tuple3));
-        auto std_t1_2_3 =
-            std::tuple_cat(std::forward<decltype(std_tuple1)>(std_tuple1), std::move(std_tuple2),
-                           std::forward<decltype(std_tuple3)>(std_tuple3));
+        auto boq_t1_2_3 = boq::tuple_cat(std::forward<decltype(boq_tuple1)>(boq_tuple1), std::move(boq_tuple2),
+                                         std::forward<decltype(boq_tuple3)>(boq_tuple3));
+        auto std_t1_2_3 = std::tuple_cat(std::forward<decltype(std_tuple1)>(std_tuple1), std::move(std_tuple2),
+                                         std::forward<decltype(std_tuple3)>(std_tuple3));
 
         static_for<0, tuple_size_v<decltype(boq_t1_2_3)>>(
             [&](auto i) { ASSERT_EQ(get<i.value>(boq_t1_2_3), get<i.value>(std_t1_2_3)); });
@@ -108,8 +102,7 @@ int main()
         // Tuple<int, CopyCounter, unsigned int> => Tuple<int, CopyStats, int>
         // Tuple{42, c, 12U} => Tuple{44, c.stats, 14}
 
-        static_assert(
-            std::is_same_v<std::remove_cvref_t<decltype(tup2)>, Tuple<int, CopyStats, int>>);
+        static_assert(std::is_same_v<std::remove_cvref_t<decltype(tup2)>, Tuple<int, CopyStats, int>>);
         ASSERT_EQ(get<0>(tup2), 44);
         ASSERT_EQ(get<1>(tup2), (CopyStats{0, 0, 0}));
         ASSERT_EQ(get<2>(tup2), 14);
@@ -123,8 +116,7 @@ int main()
 
         auto tup2 = filter<std::is_integral>(std::forward<decltype(tup)>(tup));
 
-        static_assert(
-            std::is_same_v<std::remove_cvref_t<decltype(tup2)>, Tuple<int, unsigned int>>);
+        static_assert(std::is_same_v<std::remove_cvref_t<decltype(tup2)>, Tuple<int, unsigned int>>);
         ASSERT_EQ(get<0>(tup2), 42);
         ASSERT_EQ(get<1>(tup2), 12);
         ASSERT_EQ(c.stats, (CopyStats{0, 0, 0}));
@@ -138,12 +130,11 @@ int main()
         auto&& tup = builder.build(Tuple{42, 2.3F, c, 3.4, 12U});
         auto&& ref_tup = builder.build(Tuple{42, 2.3F, c2, 3.4, 12U});
 
-        auto tup2 =
-            filter<boq::not_<std::is_integral>::predicate>(std::forward<decltype(tup)>(tup));
+        auto tup2 = filter<boq::not_<std::is_integral>::predicate>(std::forward<decltype(tup)>(tup));
         auto ref_tup2 = std::forward<decltype(ref_tup)>(ref_tup);
 
-        static_assert(std::is_same_v<std::remove_cvref_t<decltype(tup2)>,
-                                     Tuple<float, IndexedCopyCounter<boq_tuple>, double>>);
+        static_assert(
+            std::is_same_v<std::remove_cvref_t<decltype(tup2)>, Tuple<float, IndexedCopyCounter<boq_tuple>, double>>);
         ASSERT_EQ(get<0>(tup2), 2.3F);
         ASSERT_EQ(get<1>(tup2), get<2>(ref_tup2));
         ASSERT_EQ(get<2>(tup2), 3.4);
@@ -161,8 +152,7 @@ int main()
         int i = 10;
         Tuple<int, int&, int> tup{4, i, 11};
 
-        auto tup2 =
-            filter<boq::not_<std::is_reference>::predicate>(std::forward<decltype(tup)>(tup));
+        auto tup2 = filter<boq::not_<std::is_reference>::predicate>(std::forward<decltype(tup)>(tup));
         // static_assert(std::is_same_v<decltype(tup2), Tuple<int, int>>);
         ASSERT((std::is_same_v<decltype(tup2), Tuple<int, int>>));
     });
@@ -172,17 +162,15 @@ int main()
     // similar to the push_back operation from Metaprogramming.h, only difference is that we
     // "push_back" the elements of the second tuple, not the whole tuple
     Tester::test("tuple_cat_result_2_inputs", []() {
-        static_assert(
-            std::is_same_v<detail::tuple_cat_result_t<Tuple<int, int&, int>, Tuple<int&&>>,
-                           Tuple<int, int&, int, int&&>>);
+        static_assert(std::is_same_v<detail::tuple_cat_result_t<Tuple<int, int&, int>, Tuple<int&&>>,
+                                     Tuple<int, int&, int, int&&>>);
     });
 
     // Homework: step 3. Update tuple_cat_result_t metafunction to handle more than 2 inputs
     // Hint: Recursion should do the trick
     Tester::test("tuple_cat_result", []() {
         static_assert(
-            std::is_same_v<detail::tuple_cat_result_t<Tuple<double&, double>, Tuple<int, int&, int>,
-                                                      Tuple<int&&>>,
+            std::is_same_v<detail::tuple_cat_result_t<Tuple<double&, double>, Tuple<int, int&, int>, Tuple<int&&>>,
                            Tuple<double&, double, int, int&, int, int&&>>);
     });
 
@@ -222,12 +210,10 @@ int main()
     // and inserting empty tuples for those that don't (use if_ from Metaprogramming.h). Then pass
     // that type to the tuple_cat_result_t metafunction created in step 2.
     Tester::test("filter_result", []() {
+        static_assert(std::is_same_v<detail::filter_result_t<Tuple<int, double, unsigned>, std::is_integral>,
+                                     Tuple<int, unsigned>>);
         static_assert(
-            std::is_same_v<detail::filter_result_t<Tuple<int, double, unsigned>, std::is_integral>,
-                           Tuple<int, unsigned>>);
-        static_assert(
-            std::is_same_v<detail::filter_result_t<Tuple<int, int&, int&&>, std::is_reference>,
-                           Tuple<int&, int&&>>);
+            std::is_same_v<detail::filter_result_t<Tuple<int, int&, int&&>, std::is_reference>, Tuple<int&, int&&>>);
     });
 
     // Homework step6: Make filter compatible with refences using the now reference-compatible
@@ -239,8 +225,7 @@ int main()
         int i = 10;
         Tuple<int, int&, int> tup{4, i, 11};
 
-        auto tup2 =
-            filter<boq::not_<std::is_reference>::predicate>(std::forward<decltype(tup)>(tup));
+        auto tup2 = filter<boq::not_<std::is_reference>::predicate>(std::forward<decltype(tup)>(tup));
         // static_assert(std::is_same_v<decltype(tup2), Tuple<int, int>>);
         ASSERT((std::is_same_v<decltype(tup2), Tuple<int, int>>));
 

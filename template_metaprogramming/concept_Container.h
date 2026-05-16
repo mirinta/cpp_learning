@@ -3,8 +3,7 @@
 #include <vector>
 
 template <typename T>
-concept Container = requires(T t)
-{
+concept Container = requires(T t) {
     typename T::value_type;
     typename T::size_type;
     typename T::allocator_type;
@@ -17,8 +16,6 @@ concept Container = requires(T t)
     t.cend();
 };
 
-struct A
-{
-};
+struct A {};
 static_assert(not Container<A>);
 static_assert(Container<std::vector<int>>);
